@@ -57,7 +57,13 @@ class Resolver {
       throw new Error(`The resolver's rootPath wasn't set, so it can't automatically look up the ${name} ${type}. Either register the ${name} ${type} ahead of time, or set a rootPath.`);
     }
 
-    let factoryPath = `${this.rootPath}/resources/${name}/${type}`;
+    let factoryPath: string;
+
+    if (name === Resolver.MAIN) {
+      factoryPath = `${this.rootPath}/${type}`;
+    } else {
+      factoryPath = `${this.rootPath}/resources/${name}/${type}`;
+    }
 
     return cache[name] = require(factoryPath).default;
   }

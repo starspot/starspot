@@ -3,8 +3,6 @@
  * to the console.
  */
 
-import { Event } from "./index";
-
 export interface IFormatters {
   [index: string]: {
     [index: string]: (event: any) => string;
@@ -31,7 +29,7 @@ export default <IFormatters>{
       return `Unable to enable SSL: couldn't find missing file ${missingFile}`;
     },
 
-    "Error"({ code, syscall, path }) {
+    "Error"({ syscall, path }) {
       return `Permission denied when attempting to ${syscall} ${path}.`;
     }
   },
@@ -49,7 +47,7 @@ ${subtaskMessage}
 `;
     },
 
-    "ask-setup"({ appName, subtaskMessages }: { appName: string, subtaskMessages: string[] }) {
+    "ask-setup"() {
       return "OK to proceed?";
     }
   }

@@ -1,19 +1,19 @@
 namespace JSONAPI {
   export type ID = string | number;
 
-  interface TopLevel {
-    data?: {};
-    errors?: any[];
-  }
+  // interface TopLevel {
+  //   data?: {};
+  //   errors?: any[];
+  // }
 
-  interface LinkObject {
+  export interface LinkObject {
     href: string;
     meta: any;
   }
 
-  type Link = LinkObject | string;
+  export type Link = LinkObject | string;
 
-  interface LinksAbout {
+  export interface LinksAbout {
     about: Link;
   }
 

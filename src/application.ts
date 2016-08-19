@@ -2,6 +2,7 @@ import UI from "./ui";
 import Router from "./router";
 import Serializer from "./json-api/serializer";
 import Resolver from "./resolver";
+import { ServerResponse } from "http";
 
 export interface ConstructorOptions {
   ui?: UI;
@@ -42,12 +43,22 @@ class Application {
 
     let routes = this._router.handlersFor(path);
 
+    if (!routes) {
+      response.setHeader("Content-Type", "text/html");
+      response.statusCode = 404;
+      response.write("<h2>Not found!</h2>");
+      response.end();
+      return Promise.resolve(response);
+    }
+
     for (let i = 0; i < routes.length; i++) {
       let routeName = routes[i].handler;
       let controller = this._resolver.findController(routeName);
       let result = controller.get();
       response.write(JSON.stringify(this._serializer.serialize(result)));
     }
+
+    response.end();
 
     return Promise.resolve(response);
   }
@@ -61,9 +72,7 @@ namespace Application {
     trailers?: any;
   }
 
-  export interface Response {
-    write(chunk: string | Buffer): void;
-    end(): void;
+  export interface Response extends ServerResponse {
   }
 }
 

@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "target": "es2015",
     "module": "commonjs",
+    "inlineSourceMap": true,
     "declaration": true,
 
     // Input/output paths
@@ -17,7 +18,6 @@
   },
 
   "include": [
-    "src/index.ts",
-    "typings/**/*.d.ts"
+    "src/**/*"
   ]
 }
