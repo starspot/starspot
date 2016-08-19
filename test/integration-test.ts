@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Application, Router, Resolver, Controller } from "../src";
+import { Application, Router, Resolver, Controller, Model } from "../src";
 
 describe("route dispatching", function() {
 
@@ -8,8 +8,21 @@ describe("route dispatching", function() {
     it("routes GET requests to controller's get() method", async function() {
       let app = await createApplication();
       let request = new GetRequest("/photos");
+      let response = new ServerResponse();
 
-      app.dispatch(request);
+      return app.dispatch(request, response)
+        .then((response: ServerResponse) => {
+          expect(response.toJSON()).to.deep.equal({
+            data: {
+              type: "photo",
+              id: 1234,
+              attributes: {
+                firstName: "Tom",
+                lastName: "Dale"
+              }
+            }
+          });
+        });
     });
 
   });
@@ -21,13 +34,37 @@ class GetRequest implements Application.Request {
   constructor(public url: string) { }
 }
 
+class ServerResponse implements Application.Response {
+  writeBuffer = "";
+
+  write(chunk: string | Buffer) {
+    this.writeBuffer += chunk.toString();
+  }
+
+  end() { }
+
+  toJSON(): {} {
+    return JSON.parse(this.writeBuffer);
+  }
+}
+
 async function createApplication(routes?: Function) {
   let resolver = new Resolver();
   let app = new Application({ resolver });
+  class Photo extends Model {
+    static attributes = ["firstName", "lastName"];
+    firstName: string;
+    lastName: string;
+  };
 
   resolver.registerFactory("controller", "photos", class extends Controller {
     get() {
-      return ["hello world"];
+      let photo = this.createModel("photo") as Photo;
+      photo.id = 1234;
+      photo.firstName = "Tom";
+      photo.lastName = "Dale";
+
+      return photo;
     }
   });
 
@@ -40,6 +77,8 @@ async function createApplication(routes?: Function) {
       }
     }
   });
+
+  resolver.registerFactory("model", "photo", Photo);
 
   await app.boot();
 

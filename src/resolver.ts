@@ -20,6 +20,10 @@ class Resolver {
 
   }
 
+  static metaFor(instance: any): Resolver.Meta {
+    return instance[Resolver.META];
+  }
+
   registerFactory(type: string, name: Key, factory: Factory): void {
     cacheFor(this.factoryCache, type)[name] = factory;
   }
@@ -35,6 +39,8 @@ class Resolver {
 
     let Factory = this.findFactory(type, name);
     let instance = new Factory();
+
+    instance[Resolver.META] = { name, resolver: this };
 
     cache[name] = instance;
 
@@ -59,6 +65,16 @@ class Resolver {
 
 namespace Resolver {
   export const MAIN = Symbol("resolver main");
+  export const META = Symbol("meta");
+
+  export interface Meta {
+    name: string;
+    resolver: Resolver;
+  }
+
+  export interface Result {
+    [meta: string]: Meta
+  }
 }
 
 function cacheFor(cache: Cache, type: string): TypeCache {
