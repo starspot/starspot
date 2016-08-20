@@ -50,16 +50,25 @@ class Application {
       return Promise.resolve(response);
     }
 
+    let result: any;
+
     for (let i = 0; i < routes.length; i++) {
       let routeName = routes[i].handler;
       let controller = this._resolver.findController(routeName);
-      let result = controller.get();
-      response.write(JSON.stringify(this._serializer.serialize(result)));
+      result = controller.get();
+
+      if (result) { break; }
     }
 
-    response.end();
+    return Promise.resolve(result)
+      .then(model => {
+        let json = this._serializer.serialize(model);
+        let stringified = JSON.stringify(json);
 
-    return Promise.resolve(response);
+        response.write(stringified);
+        response.end();
+      })
+      .then(() => response);
   }
 }
 

@@ -1,17 +1,42 @@
 import { expect } from "chai";
-import { Application, Router, Resolver, Controller, Model } from "../src";
+import { Model, Controller } from "../src";
+import * as test from "./helpers/application";
 
 describe("route dispatching", function() {
 
   describe("top-level routes", function() {
+    class PhotoController extends Controller {
+      get() {
+        let photo = this.createModel("photo") as Photo;
+        photo.id = 1234;
+        photo.firstName = "Tom";
+        photo.lastName = "Dale";
+
+        return photo;
+      }
+    }
+
+    class Photo extends Model {
+      static attributes = ["firstName", "lastName"];
+      firstName: string;
+      lastName: string;
+    };
 
     it("routes GET requests to controller's get() method", async function() {
-      let app = await createApplication();
-      let request = new GetRequest("/photos");
-      let response = new ServerResponse();
+
+      let app = await test.createApplication()
+        .routes(function() {
+          this.route("photos");
+        })
+        .controller("photos", PhotoController)
+        .model("photo", Photo)
+        .boot();
+
+      let request = test.createRequest("/photos");
+      let response = test.createResponse();
 
       return app.dispatch(request, response)
-        .then((response: ServerResponse) => {
+        .then(() => {
           expect(response.toJSON()).to.deep.equal({
             data: {
               type: "photo",
@@ -25,63 +50,44 @@ describe("route dispatching", function() {
         });
     });
 
+    it("allows controller to return a promise", async function() {
+      class PromisePhotoController extends Controller {
+        get() {
+          return new Promise(resolve => {
+            let photo = this.createModel("photo") as Photo;
+            photo.id = 1234;
+            photo.firstName = "Tom";
+            photo.lastName = "Dale";
+
+            setTimeout(() => resolve(photo), 1000);
+          });
+        }
+      }
+
+      let app = await test.createApplication()
+        .routes(function() {
+          this.route("photos");
+        })
+        .controller("photos", PromisePhotoController)
+        .model("photo", Photo)
+        .boot();
+
+      let request = test.createRequest("/photos");
+      let response = test.createResponse();
+
+      await app.dispatch(request, response);
+
+      expect(response.toJSON()).to.deep.equal({
+        data: {
+          type: "photo",
+          id: 1234,
+          attributes: {
+            firstName: "Tom",
+            lastName: "Dale"
+          }
+        }
+      });
+    });
+
   });
 });
-
-class GetRequest implements Application.Request {
-  method = "GET";
-
-  constructor(public url: string) { }
-}
-
-class ServerResponse implements Application.Response {
-  writeBuffer = "";
-
-  write(buffer: string | Buffer) {
-    this.writeBuffer += buffer.toString();
-    return true;
-  }
-
-  end() { }
-
-  toJSON(): {} {
-    return JSON.parse(this.writeBuffer);
-  }
-}
-
-async function createApplication(routes?: Function) {
-  let resolver = new Resolver();
-  let app = new Application({ resolver });
-  class Photo extends Model {
-    static attributes = ["firstName", "lastName"];
-    firstName: string;
-    lastName: string;
-  };
-
-  resolver.registerFactory("controller", "photos", class extends Controller {
-    get() {
-      let photo = this.createModel("photo") as Photo;
-      photo.id = 1234;
-      photo.firstName = "Tom";
-      photo.lastName = "Dale";
-
-      return photo;
-    }
-  });
-
-  resolver.registerFactory("router", Resolver.MAIN, class extends Router {
-    map() {
-      if (routes) {
-        routes.call(this);
-      } else {
-        this.route("photos");
-      }
-    }
-  });
-
-  resolver.registerFactory("model", "photo", Photo);
-
-  await app.boot();
-
-  return app;
-}

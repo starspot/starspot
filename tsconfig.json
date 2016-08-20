@@ -6,13 +6,12 @@
     // Module configuration
     "moduleResolution": "node",
     "target": "es2015",
-    "module": "commonjs",
-    "declaration": true
+    "module": "commonjs"
   },
 
   "include": [
     "src/index.ts",
     "src/typings/**/*.d.ts",
-    "test/**/*.ts" 
+    "test/**/*.ts"
   ]
 }

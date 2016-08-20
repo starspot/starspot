@@ -2,7 +2,7 @@ import Resolver from "./resolver";
 import Model from "./model";
 
 abstract class Controller {
-  abstract get<T>(): T[] | T;
+  abstract get<T>(): T[] | T | Promise<T[]> | Promise<T>;
 
   createModel(modelName: string): Model {
     let resolver = Resolver.metaFor(this).resolver;

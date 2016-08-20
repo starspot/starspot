@@ -79,7 +79,7 @@ namespace Resolver {
   }
 
   export interface Result {
-    [meta: string]: Meta
+    [meta: string]: Meta;
   }
 }
 
