@@ -2,7 +2,6 @@ import UI from "./ui";
 import Router from "./router";
 import Serializer from "./json-api/serializer";
 import Resolver from "./resolver";
-import { ServerResponse } from "http";
 
 export interface ConstructorOptions {
   ui?: UI;
@@ -72,7 +71,11 @@ namespace Application {
     trailers?: any;
   }
 
-  export interface Response extends ServerResponse {
+  export interface Response {
+    statusCode: number;
+    setHeader(header: string, value: string): void;
+    write(chunk: Buffer | string, cb?: Function): boolean;
+    end(): void;
   }
 }
 

@@ -37,8 +37,9 @@ class GetRequest implements Application.Request {
 class ServerResponse implements Application.Response {
   writeBuffer = "";
 
-  write(chunk: string | Buffer) {
-    this.writeBuffer += chunk.toString();
+  write(buffer: string | Buffer) {
+    this.writeBuffer += buffer.toString();
+    return true;
   }
 
   end() { }
