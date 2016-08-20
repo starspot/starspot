@@ -1,6 +1,7 @@
 import UI from "./ui";
-import Router from "./router";
+import Router, { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
+import JSONAPI from "./json-api/interfaces";
 import Resolver from "./resolver";
 
 export interface ConstructorOptions {
@@ -38,11 +39,9 @@ class Application {
   }
 
   dispatch(request: Application.Request, response: Application.Response): Promise<Application.Response> {
-    let path = request.url;
+    let handlers = this._router.handlersFor(request.method as HTTPVerb, request.url);
 
-    let routes = this._router.handlersFor(path);
-
-    if (!routes) {
+    if (!handlers) {
       response.setHeader("Content-Type", "text/html");
       response.statusCode = 404;
       response.write("<h2>Not found!</h2>");
@@ -52,20 +51,30 @@ class Application {
 
     let result: any;
 
-    for (let i = 0; i < routes.length; i++) {
-      let routeName = routes[i].handler;
-      let controller = this._resolver.findController(routeName);
-      result = controller.get();
+    for (let i = 0; i < handlers.length; i++) {
+      let handler: Handler  = handlers[i].handler;
+
+      let controller = this._resolver.findController(handler.controller);
+      let method = handler.method;
+
+      if (method && controller[method]) {
+        result = controller[method]();
+      }
 
       if (result) { break; }
     }
 
     return Promise.resolve(result)
       .then(model => {
-        let json = this._serializer.serialize(model);
-        let stringified = JSON.stringify(json);
+        let json: JSONAPI.Document;
 
-        response.write(stringified);
+        if (Array.isArray(model)) {
+          json = this._serializer.serializeMany(model);
+        } else {
+          json = this._serializer.serialize(model);
+        }
+
+        response.write(JSON.stringify(json));
         response.end();
       })
       .then(() => response);

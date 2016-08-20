@@ -8,14 +8,14 @@ describe("Router", () => {
     it("supports simple routes", () => {
       class MyRouter extends Router {
         map() {
-          this.route("my-route");
+          this.resource("my-route");
         }
       }
 
       let router = new MyRouter();
       router.seal();
 
-      expect(router.hasRoute("my-route")).to.be.true;
+      expect(router.handlersFor("GET", "my-route").length).to.equal(1);
     });
 
   });

@@ -4,15 +4,22 @@ import * as test from "./helpers/application";
 
 describe("route dispatching", function() {
 
-  describe("top-level routes", function() {
+  describe("resources", function() {
     class PhotoController extends Controller {
-      get() {
-        let photo = this.createModel("photo") as Photo;
-        photo.id = 1234;
-        photo.firstName = "Tom";
-        photo.lastName = "Dale";
+      index() {
+        let photo1 = new Photo({
+          id: 1234,
+          firstName: "Tom",
+          lastName: "Dale"
+        });
 
-        return photo;
+        let photo2 = new Photo({
+          id: 4567,
+          firstName: "Zahra",
+          lastName: "Jabini"
+        });
+
+        return [photo1, photo2];
       }
     }
 
@@ -22,11 +29,11 @@ describe("route dispatching", function() {
       lastName: string;
     };
 
-    it("routes GET requests to controller's get() method", async function() {
+    it("routes GET /<resource> to controller's index() method", async function() {
 
       let app = await test.createApplication()
         .routes(function() {
-          this.route("photos");
+          this.resource("photos");
         })
         .controller("photos", PhotoController)
         .model("photo", Photo)
@@ -38,35 +45,42 @@ describe("route dispatching", function() {
       return app.dispatch(request, response)
         .then(() => {
           expect(response.toJSON()).to.deep.equal({
-            data: {
+            data: [{
               type: "photo",
               id: 1234,
               attributes: {
                 firstName: "Tom",
                 lastName: "Dale"
               }
-            }
+            }, {
+              type: "photo",
+              id: 4567,
+              attributes: {
+                firstName: "Zahra",
+                lastName: "Jabini"
+              }
+            }]
           });
         });
     });
 
     it("allows controller to return a promise", async function() {
       class PromisePhotoController extends Controller {
-        get() {
+        index() {
           return new Promise(resolve => {
             let photo = this.createModel("photo") as Photo;
             photo.id = 1234;
             photo.firstName = "Tom";
             photo.lastName = "Dale";
 
-            setTimeout(() => resolve(photo), 1000);
+            setImmediate(() => resolve(photo));
           });
         }
       }
 
       let app = await test.createApplication()
         .routes(function() {
-          this.route("photos");
+          this.resource("photos");
         })
         .controller("photos", PromisePhotoController)
         .model("photo", Photo)

@@ -5,24 +5,36 @@ interface Attributes {
 }
 
 class Serializer {
-  serialize(model: Serializer.Serializable) {
-    let payload = {
-      data: <any> {}
-    };
+  serialize(model: Serializer.Serializable): JSONAPI.Document {
+    let data = serializeModel(model);
 
-    let protocol = model["@@SerializerProtocol"];
-
-    payload.data.id = protocol.getID(model);
-    payload.data.type = protocol.getType(model);
-
-    let attributes: Attributes = payload.data.attributes = { };
-
-    for (let attribute of protocol.getAttributes(model)) {
-      attributes[attribute] = protocol.getAttribute(model, attribute);
-    }
-
-    return payload;
+    return { data };
   }
+
+  serializeMany(models: Serializer.Serializable[]): JSONAPI.Document {
+    let data = models.map(m => serializeModel(m));
+
+    return { data };
+  }
+}
+
+function serializeModel(model: Serializer.Serializable): JSONAPI.ResourceObject  {
+  let protocol = protocolFor(model);
+  let attributes: Attributes = {};
+
+  for (let attribute of protocol.getAttributes(model)) {
+    attributes[attribute] = protocol.getAttribute(model, attribute);
+  }
+
+  return {
+    id: protocol.getID(model),
+    type: protocol.getType(model),
+    attributes: attributes
+  };
+}
+
+function protocolFor(obj: any) {
+  return obj["@@SerializerProtocol"];
 }
 
 namespace Serializer {

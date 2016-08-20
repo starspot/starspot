@@ -1,25 +1,29 @@
 import * as RouteRecognizer from "route-recognizer";
 
-interface Route {
-  name: string;
-  path: string;
-  handler: any;
+export type RecognizeResults = RouteRecognizer.RecognizeResults;
+
+export interface Handler {
+  controller: string;
+  method: string;
 }
+
+interface Route extends RouteRecognizer.Route {
+  handler: Handler;
+}
+
+interface Recognizers {
+  [key: string]: RouteRecognizer;
+}
+
+export type HTTPVerb = "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 abstract class Router {
   private routes: Route[] = [];
-
-  private recognizer: RouteRecognizer;
+  private recognizers: Recognizers = {};
   private isMapping = false;
-  private currentRoute: Route = null;
 
   abstract map(): void;
 
-  constructor() {
-    this.recognizer = new RouteRecognizer();
-  }
-
-  // Seal the class/**/
   seal() {
     this.isMapping = true;
     this.map();
@@ -30,30 +34,41 @@ abstract class Router {
     return !!this.routes.find(r => r.name === routeName);
   }
 
-  public route(routeName: string) {
-    if (!this.isMapping) {
-      throw new Error("Router: You can't call the router's route() method outside of the map() method.");
+  private recognizerFor(verb: HTTPVerb, create?: boolean) {
+    let recognizer = this.recognizers[verb];
+    if (!recognizer && create) {
+      recognizer = this.recognizers[verb] = new RouteRecognizer();
     }
 
-    let route = routeFromRouteName(routeName);
-
-    let routes = [route];
-    this.recognizer.add(routes);
-    this.routes.push(route);
-    this.currentRoute = route;
+    return recognizer;
   }
 
-  handlersFor(route: string): RouteRecognizer.RecognizeResults[] {
-    return this.recognizer.recognize(route);
-  }
-}
+  private addRoute(verb: HTTPVerb, path: string, controller: string, method: string) {
+    let recognizer = this.recognizerFor(verb, true);
 
-function routeFromRouteName(routeName: string): Route {
-  return {
-    name: routeName,
-    path: routeName,
-    handler: routeName
-  };
+    let handler: Handler = { controller, method };
+    let route: Route = { path, handler };
+
+    recognizer.add([route]);
+  }
+
+  resource(routeName: string) {
+    if (!this.isMapping) {
+      throw new Error("Router: You can't call the router's resource() method outside of the map() method.");
+    }
+
+    this.addRoute("GET", routeName, routeName, "index");
+  }
+
+  handlersFor(verb: HTTPVerb, path: string): RecognizeResults[] {
+    let recognizer = this.recognizerFor(verb);
+
+    if (recognizer) {
+      return recognizer.recognize(path);
+    }
+
+    return null;
+  }
 }
 
 export default Router;

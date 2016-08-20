@@ -6,8 +6,9 @@ declare module "route-recognizer" {
 
   namespace RouteRecognizer {
     interface Route {
-      name: string;
+      name?: string;
       path: string;
+      handler: any;
     }
 
     interface RecognizeResults {

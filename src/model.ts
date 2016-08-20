@@ -5,7 +5,13 @@ export type ID = JSONAPISerializer.ID;
 
 class Serializer implements JSONAPISerializer.Protocol<Model> {
   getType(model: Model): string {
-    return Resolver.metaFor(model).name;
+    let meta = Resolver.metaFor(model);
+
+    if (meta && meta.name) {
+      return meta.name;
+    }
+
+    return model.constructor.name.toLowerCase();
   }
 
   getID(model: Model): ID {
@@ -32,6 +38,9 @@ export default class Model implements JSONAPISerializer.Serializable {
 
   id: ID;
 
-  constructor() {
+  constructor(attributes?: any) {
+    if (attributes) {
+      Object.assign(this, attributes);
+    }
   }
 }
