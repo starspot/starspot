@@ -12,7 +12,13 @@ export interface Dict<T> {
 }
 
 export class FakeRequest implements Application.Request {
-  constructor(public url: string, public method: string) { }
+  public headers: { [key: string]: string };
+
+  constructor(public url: string, public method: string) {
+    this.headers = {
+      "accept": "application/json"
+    };
+  }
 }
 
 export class FakeResponse implements Application.Response {
