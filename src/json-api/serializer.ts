@@ -27,7 +27,8 @@ function serializeModel(model: Serializer.Serializable): JSONAPI.ResourceObject 
   let attributes: Attributes = {};
 
   for (let attribute of protocol.getAttributes(model)) {
-    attributes[attribute] = protocol.getAttribute(model, attribute);
+    let attrValue = protocol.getAttribute(model, attribute);
+    attributes[attribute] = attrValue === undefined ? null : protocol.getAttribute(model, attribute);
   }
 
   return {

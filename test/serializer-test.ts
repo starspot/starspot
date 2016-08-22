@@ -94,6 +94,29 @@ describe("Serializer", () => {
         }]
       });
     });
+
+    it("converts undefined values to null", function() {
+      class Post extends Model {
+        static attributes = ["name", "datePosted"];
+      }
+
+      let post = new Post({
+        id: 123,
+        name: "The Importance of Being Earnest"
+      });
+
+      expect(serializer.serialize(post)).to.deep.equal({
+        data: {
+          type: "post",
+          id: 123,
+          attributes: {
+            name: "The Importance of Being Earnest",
+            datePosted: null
+          }
+        }
+      });
+    });
+
   });
 
 });
