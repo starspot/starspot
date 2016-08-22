@@ -64,6 +64,11 @@ abstract class Router {
 }
 
 namespace Router {
+  export interface RouteOptions {
+    controller: string;
+    method: string;
+  }
+
   /*
   * Implements the route map DSL. Note that the methods of this class are
   * implemented as function properties, not using method syntax. That's because
@@ -100,6 +105,11 @@ namespace Router {
       router.addRoute("PATCH", memberPath, controller, "update");
       // DELETE /photos/1234 -> PhotosController.destroy()
       router.addRoute("PATCH", memberPath, controller, "destroy");
+    }
+
+    get = (path: string, { controller, method }: RouteOptions): void => {
+      let router = this._router;
+      router.addRoute("GET", path, controller, method);
     }
   }
 }

@@ -4,6 +4,29 @@ import * as test from "./helpers/application";
 
 describe("route dispatching", function() {
 
+  describe("responses", function() {
+
+    it("passes the response to the controller", async function() {
+      let request = test.createRequest("/photos");
+      let response = test.createResponse();
+
+      class PhotoController extends Controller {
+        show({ response: passedResponse }: Controller.Parameters) {
+          expect(passedResponse).to.equal(response);
+        }
+      }
+
+      let app = await test.createApplication()
+        .routes(({ get }) => {
+          get("photos", { controller: "photos", method: "show" });
+        })
+        .controller("photos", PhotoController)
+        .boot();
+
+      await app.dispatch(request, response);
+    });
+  });
+
   describe("resources", function() {
     class PhotoController extends Controller {
       index() {
@@ -42,26 +65,25 @@ describe("route dispatching", function() {
       let request = test.createRequest("/photos");
       let response = test.createResponse();
 
-      return app.dispatch(request, response)
-        .then(() => {
-          expect(response.toJSON()).to.deep.equal({
-            data: [{
-              type: "photo",
-              id: 1234,
-              attributes: {
-                firstName: "Tom",
-                lastName: "Dale"
-              }
-            }, {
-              type: "photo",
-              id: 4567,
-              attributes: {
-                firstName: "Zahra",
-                lastName: "Jabini"
-              }
-            }]
-          });
-        });
+      await app.dispatch(request, response);
+
+      expect(response.toJSON()).to.deep.equal({
+        data: [{
+          type: "photo",
+          id: 1234,
+          attributes: {
+            firstName: "Tom",
+            lastName: "Dale"
+          }
+        }, {
+          type: "photo",
+          id: 4567,
+          attributes: {
+            firstName: "Zahra",
+            lastName: "Jabini"
+          }
+        }]
+      });
     });
 
     it("allows controller to return a promise", async function() {
