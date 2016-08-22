@@ -11,84 +11,6 @@ export interface ConstructorOptions {
   resolver?: Resolver;
 }
 
-const STYLESHEET = `
-  body {
-    background-color: #002b36;
-  }
-
-  main {
-    font: 16px Menlo, Monaco, monospace;
-  }
-
-  pre {
-    margin: 0;
-    font: inherit;
-    padding: 16px;
-    line-height: 1.4em;
-  }
-
-  .json {
-    color: #93a1a1;
-  }
-
-  .json .control {
-    color: #586e75;
-  }
-
-  .json a {
-    color: inherit;
-    text-decoration:  none;
-  }
-
-  .json a span.text {
-    border-bottom: 2px solid #F1F3F6;
-  }
-
-  .json .key {
-    color: #268bd2;
-    font-weight: bold;
-  }
-
-  .json > .dictionary > .key-content .key {
-    color: #214373;
-  }
-
-  .json > .dictionary > .key-content .string,
-  .json > .dictionary > .key-title .string,
-  .json > .dictionary > .key-summary .string,
-  .json > .dictionary > .key-id .string {
-    color: #496281;
-  }
-
-  .json > .dictionary > .key-content .number,
-  .json > .dictionary > .key-title .number,
-  .json > .dictionary > .key-summary .number,
-  .json > .dictionary > .key-id .number {
-    color: #13BAA6;
-  }
-
-  .json > .dictionary > .key-content .null,
-  .json > .dictionary > .key-content .boolean,
-  .json > .dictionary > .key-content .number,
-  .json > .dictionary > .key-title .null,
-  .json > .dictionary > .key-title .boolean,
-  .json > .dictionary > .key-title .number,
-  .json > .dictionary > .key-summary .null,
-  .json > .dictionary > .key-summary .boolean,
-  .json > .dictionary > .key-summary .number,
-  .json > .dictionary > .key-id .null,
-  .json > .dictionary > .key-id .boolean,
-  .json > .dictionary > .key-id .number {
-    color: #FF416C;
-  }
-
-  .json > .dictionary > .key-content > .key,
-  .json > .dictionary > .key-title > .key,
-  .json > .dictionary > .key-summary > .key,
-  .json > .dictionary > .key-id > .key {
-    color: #0070FF;
-  }`;
-
 class Application {
   protected ui: UI;
 
@@ -130,47 +52,36 @@ class Application {
     let handlers = this._router.handlersFor(verb as HTTPVerb, path);
 
     if (!handlers) {
-      ui.info({
-        name: "dispatch-not-found",
-        verb,
-        path
-      });
-
-      response.setHeader("Content-Type", "text/html");
-      response.statusCode = 404;
-      response.write("<h2>Not found!</h2>");
-      response.end();
+      this.routeNotFound(request, response, verb, path);
       return Promise.resolve(response);
     }
 
     let result: any;
 
-    for (let i = 0; i < handlers.length; i++) {
-      let handler: Handler  = handlers[i].handler;
+    let handler: Handler  = handlers[0].handler;
 
-      let controllerName = handler.controller;
-      let controller = this._resolver.findController(controllerName);
-      let method = handler.method;
+    let controllerName = handler.controller;
+    let controller = this._resolver.findController(controllerName);
+    let method = handler.method;
 
-      ui.info({
-        name: "dispatch-dispatching",
-        controller: controllerName,
-        verb,
-        path,
-        method
-      });
+    ui.info({
+      name: "dispatch-dispatching",
+      controller: controllerName,
+      verb,
+      path,
+      method
+    });
 
-      if (method && controller[method]) {
-        try {
-          result = Promise.resolve(controller[method]({ response }));
-        } catch (e) {
-          result = Promise.reject(e);
-        }
-      } else {
-        result = Promise.resolve({});
+    if (controller && controller[method]) {
+      try {
+        let controllerParams = { response };
+        result = Promise.resolve(controller[method](controllerParams));
+      } catch (e) {
+        result = Promise.reject(e);
       }
-
-      if (result) { break; }
+    } else {
+      this.controllerMethodNotFound(request, response, controllerName, method);
+      return Promise.resolve(response);
     }
 
     return result
@@ -187,10 +98,8 @@ class Application {
         }
 
         if (request.headers["accept"].split(",").map((s: string) => s.split(";")[0]).indexOf("text/html") > -1) {
-          response.setHeader("Content-Type", "text/html");
-          response.write(`<html><head><style>${STYLESHEET}</style></head><body><main><pre class="json">`);
-          response.write(jsonToHTML(json || model));
-          response.write("</pre></main></body></html>");
+          console.log("serializing: ", json || model);
+          this.sendJSONAsHTML(json || model, response);
         } else {
           response.setHeader("Content-Type", "application/json");
           response.write(JSON.stringify(json || model));
@@ -206,6 +115,42 @@ class Application {
       });
 
   }
+
+  routeNotFound(_: Application.Request, response: Application.Response, verb: string, path: string): void {
+    this.ui.info({
+      name: "dispatch-route-not-found",
+      verb,
+      path
+    });
+
+    response.setHeader("Content-Type", "text/html");
+    response.statusCode = 404;
+    response.write("<h2>Not found!</h2>");
+    response.end();
+  }
+
+  controllerMethodNotFound(request: Application.Request, response: Application.Response, controller: string, method: string): void {
+    this.ui.info({
+      name: "dispatch-route-not-found",
+      controller,
+      method
+    });
+
+    response.setHeader("Content-Type", "text/html");
+    response.statusCode = 404;
+    response.end(jsonToHTML({
+      error: "Controller method not found",
+      controller,
+      method,
+      request: `${request.method} ${request.url}`
+    }));
+    response.end();
+  }
+
+  sendJSONAsHTML(json: any, response: Application.Response)  {
+    response.setHeader("Content-Type", "text/html");
+    response.end(jsonToHTML(json));
+  }
 }
 
 namespace Application {
@@ -220,7 +165,7 @@ namespace Application {
     statusCode: number;
     setHeader(header: string, value: string): void;
     write(chunk: Buffer | string, cb?: Function): boolean;
-    end(): void;
+    end(chunk?: Buffer | string): void;
   }
 }
 

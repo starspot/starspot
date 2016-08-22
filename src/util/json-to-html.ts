@@ -1,5 +1,96 @@
 import escapeHTML from "./escape-html";
 
+function wrapInDocument(content: string) {
+  return `<html>
+  <head>
+    <style>
+      body {
+        background-color: #002b36;
+      }
+
+      main {
+        font: 16px Menlo, Monaco, monospace;
+      }
+
+      pre {
+        margin: 0;
+        font: inherit;
+        padding: 16px;
+        line-height: 1.4em;
+      }
+
+      .json {
+        color: #93a1a1;
+      }
+
+      .json .control {
+        color: #586e75;
+      }
+
+      .json a {
+        color: inherit;
+        text-decoration:  none;
+      }
+
+      .json a span.text {
+        border-bottom: 2px solid #F1F3F6;
+      }
+
+      .json .key {
+        color: #268bd2;
+        font-weight: bold;
+      }
+
+      .json > .dictionary > .key-content .key {
+        color: #214373;
+      }
+
+      .json > .dictionary > .key-content .string,
+      .json > .dictionary > .key-title .string,
+      .json > .dictionary > .key-summary .string,
+      .json > .dictionary > .key-id .string {
+        color: #496281;
+      }
+
+      .json > .dictionary > .key-content .number,
+      .json > .dictionary > .key-title .number,
+      .json > .dictionary > .key-summary .number,
+      .json > .dictionary > .key-id .number {
+        color: #13BAA6;
+      }
+
+      .json > .dictionary > .key-content .null,
+      .json > .dictionary > .key-content .boolean,
+      .json > .dictionary > .key-content .number,
+      .json > .dictionary > .key-title .null,
+      .json > .dictionary > .key-title .boolean,
+      .json > .dictionary > .key-title .number,
+      .json > .dictionary > .key-summary .null,
+      .json > .dictionary > .key-summary .boolean,
+      .json > .dictionary > .key-summary .number,
+      .json > .dictionary > .key-id .null,
+      .json > .dictionary > .key-id .boolean,
+      .json > .dictionary > .key-id .number {
+        color: #FF416C;
+      }
+
+      .json > .dictionary > .key-content > .key,
+      .json > .dictionary > .key-title > .key,
+      .json > .dictionary > .key-summary > .key,
+      .json > .dictionary > .key-id > .key {
+        color: #0070FF;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <pre class="json">
+${content}
+      </pre>
+    </main>
+  </body>
+</html>`;
+}
 export interface Dict {
   [key: string]: any;
 }
@@ -37,7 +128,7 @@ class JSONHTMLSerializer {
 
         return this.hash(json);
       default:
-        throw new Error("Unsupported data type");
+        throw new Error("Unsupported data type: " + String(json));
     }
   }
 
@@ -186,5 +277,5 @@ function isEmpty(object: any): boolean {
 }
 
 export default function jsonToHTML(json: Dict) {
-  return new JSONHTMLSerializer(json).toHTML();
+  return wrapInDocument(new JSONHTMLSerializer(json).toHTML());
 }
