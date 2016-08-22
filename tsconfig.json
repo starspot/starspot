@@ -6,7 +6,8 @@
     // Module configuration
     "moduleResolution": "node",
     "target": "es2015",
-    "module": "commonjs"
+    "module": "commonjs",
+    "declaration": true
   },
 
   "include": [
