@@ -16,6 +16,10 @@ class Serializer {
 
     return { data };
   }
+
+  canSerialize(model: Serializer.Serializable): boolean {
+    return !!protocolFor(model);
+  }
 }
 
 function serializeModel(model: Serializer.Serializable): JSONAPI.ResourceObject  {

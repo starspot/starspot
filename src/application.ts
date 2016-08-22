@@ -3,12 +3,91 @@ import Router, { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
 import JSONAPI from "./json-api/interfaces";
 import Resolver from "./resolver";
+import jsonToHTML from "./util/json-to-html";
 
 export interface ConstructorOptions {
   ui?: UI;
   rootPath?: string;
   resolver?: Resolver;
 }
+
+const STYLESHEET = `
+  body {
+    background-color: #002b36;
+  }
+
+  main {
+    font: 16px Menlo, Monaco, monospace;
+  }
+
+  pre {
+    margin: 0;
+    font: inherit;
+    padding: 16px;
+    line-height: 1.4em;
+  }
+
+  .json {
+    color: #93a1a1;
+  }
+
+  .json .control {
+    color: #586e75;
+  }
+
+  .json a {
+    color: inherit;
+    text-decoration:  none;
+  }
+
+  .json a span.text {
+    border-bottom: 2px solid #F1F3F6;
+  }
+
+  .json .key {
+    color: #268bd2;
+    font-weight: bold;
+  }
+
+  .json > .dictionary > .key-content .key {
+    color: #214373;
+  }
+
+  .json > .dictionary > .key-content .string,
+  .json > .dictionary > .key-title .string,
+  .json > .dictionary > .key-summary .string,
+  .json > .dictionary > .key-id .string {
+    color: #496281;
+  }
+
+  .json > .dictionary > .key-content .number,
+  .json > .dictionary > .key-title .number,
+  .json > .dictionary > .key-summary .number,
+  .json > .dictionary > .key-id .number {
+    color: #13BAA6;
+  }
+
+  .json > .dictionary > .key-content .null,
+  .json > .dictionary > .key-content .boolean,
+  .json > .dictionary > .key-content .number,
+  .json > .dictionary > .key-title .null,
+  .json > .dictionary > .key-title .boolean,
+  .json > .dictionary > .key-title .number,
+  .json > .dictionary > .key-summary .null,
+  .json > .dictionary > .key-summary .boolean,
+  .json > .dictionary > .key-summary .number,
+  .json > .dictionary > .key-id .null,
+  .json > .dictionary > .key-id .boolean,
+  .json > .dictionary > .key-id .number {
+    color: #FF416C;
+  }
+
+  .json > .dictionary > .key-content > .key,
+  .json > .dictionary > .key-title > .key,
+  .json > .dictionary > .key-summary > .key,
+  .json > .dictionary > .key-id > .key {
+    color: #0070FF;
+  }`;
 
 class Application {
   protected ui: UI;
@@ -83,10 +162,12 @@ class Application {
 
       if (method && controller[method]) {
         try {
-          result = Promise.resolve(controller[method]());
+          result = Promise.resolve(controller[method]({ response }));
         } catch (e) {
           result = Promise.reject(e);
         }
+      } else {
+        result = Promise.resolve({});
       }
 
       if (result) { break; }
@@ -95,14 +176,26 @@ class Application {
     return result
       .then((model: Serializer.Serializable) => {
         let json: JSONAPI.Document;
+        let serializer = this._serializer;
 
         if (Array.isArray(model)) {
-          json = this._serializer.serializeMany(model);
-        } else {
-          json = this._serializer.serialize(model);
+          if (model[0] && serializer.canSerialize(model[0])) {
+            json = serializer.serializeMany(model);
+          }
+        } else if (serializer.canSerialize(model)) {
+          json = serializer.serialize(model);
         }
 
-        response.write(JSON.stringify(json));
+        if (request.headers["accept"].split(",").map((s: string) => s.split(";")[0]).indexOf("text/html") > -1) {
+          response.setHeader("Content-Type", "text/html");
+          response.write(`<html><head><style>${STYLESHEET}</style></head><body><main><pre class="json">`);
+          response.write(jsonToHTML(json || model));
+          response.write("</pre></main></body></html>");
+        } else {
+          response.setHeader("Content-Type", "application/json");
+          response.write(JSON.stringify(json || model));
+        }
+
         response.end();
       })
       .then(() => response)
@@ -119,7 +212,7 @@ namespace Application {
   export interface Request {
     method: string;
     url: string;
-    headers?: any;
+    headers: { [key: string]: string };
     trailers?: any;
   }
 
