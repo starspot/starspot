@@ -22,11 +22,11 @@ abstract class Router {
   private recognizers: Recognizers = {};
   private isMapping = false;
 
-  abstract map(): void;
+  abstract map(dsl: Router.DSL): void;
 
   seal() {
     this.isMapping = true;
-    this.map();
+    this.map(new Router.DSL(this));
     this.isMapping = false;
   }
 
@@ -43,21 +43,13 @@ abstract class Router {
     return recognizer;
   }
 
-  private addRoute(verb: HTTPVerb, path: string, controller: string, method: string) {
+  addRoute(verb: HTTPVerb, path: string, controller: string, method: string) {
     let recognizer = this.recognizerFor(verb, true);
 
     let handler: Handler = { controller, method };
     let route: Route = { path, handler };
 
     recognizer.add([route]);
-  }
-
-  resource(routeName: string) {
-    if (!this.isMapping) {
-      throw new Error("Router: You can't call the router's resource() method outside of the map() method.");
-    }
-
-    this.addRoute("GET", routeName, routeName, "index");
   }
 
   handlersFor(verb: HTTPVerb, path: string): RecognizeResults[] {
@@ -68,6 +60,47 @@ abstract class Router {
     }
 
     return null;
+  }
+}
+
+namespace Router {
+  /*
+  * Implements the route map DSL. Note that the methods of this class are
+  * implemented as function properties, not using method syntax. That's because
+  * we want users to be able to use destructuring to pull off these functions in
+  * their `map()` method, like so:
+  *
+  * ```js map({ resources }) {
+  *   resources("photos");
+  * })
+  * ```
+  *
+  * When class methods are pulled out like this, they lose the binding to their
+  * class instance when invoked. Instead, we set each DSL method to a function
+  * expression which binds `this` to the appropriate lexical scope.
+  * 
+  */
+  export class DSL {
+    constructor(private _router: Router) {
+    }
+
+    resources = (routeName: string): void => {
+      let router = this._router;
+      let controller = routeName;
+      let path = routeName;
+      let memberPath = routeName + "/:id";
+
+      // GET /photos -> PhotosController.index()
+      router.addRoute("GET", path, controller, "index");
+      // POST /photos -> PhotosController.create()
+      router.addRoute("POST", path, controller, "create");
+      // GET /photos/1234 -> PhotosController.show()
+      router.addRoute("GET", memberPath, controller, "show");
+      // PATCH /photos/1234 -> PhotosController.update()
+      router.addRoute("PATCH", memberPath, controller, "update");
+      // DELETE /photos/1234 -> PhotosController.destroy()
+      router.addRoute("PATCH", memberPath, controller, "destroy");
+    }
   }
 }
 

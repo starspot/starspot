@@ -1,14 +1,21 @@
-import { Application, Router, Resolver, Controller, Model } from "../../src";
+import {
+  Application,
+  Router,
+  Resolver,
+  Controller,
+  Model,
+  UI
+} from "../../src";
 
-interface Dict<T> {
+export interface Dict<T> {
   [key: string]: T;
 }
 
-class FakeRequest implements Application.Request {
+export class FakeRequest implements Application.Request {
   constructor(public url: string, public method: string) { }
 }
 
-class FakeResponse implements Application.Response {
+export class FakeResponse implements Application.Response {
   statusCode = 200;
   writeBuffer = "";
 
@@ -40,16 +47,17 @@ export function createResponse(): FakeResponse {
 
 export function createApplication(routes?: Function) {
   let resolver = new Resolver();
-  let app = new Application({ resolver });
+  let ui = new UI({ logLevel: UI.LogLevel.Error });
+  let app = new Application({ resolver, ui });
 
   return new ApplicationBuilderDSL(app, resolver);
 }
 
-interface Factory {
+export interface Factory {
   new (): any;
 }
 
-class ApplicationBuilderDSL {
+export class ApplicationBuilderDSL {
   constructor(private app: Application,
               private resolver: Resolver) { }
 
@@ -58,10 +66,10 @@ class ApplicationBuilderDSL {
     return this;
   }
 
-  routes(cb: () => void) {
+  routes(cb: (dsl: Router.DSL) => void) {
     this.resolver.registerFactory("router", Resolver.MAIN, class extends Router {
-      map() {
-        cb.call(this);
+      map(dsl: Router.DSL) {
+        cb(dsl);
       }
     });
 

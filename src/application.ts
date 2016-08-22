@@ -39,9 +39,24 @@ class Application {
   }
 
   dispatch(request: Application.Request, response: Application.Response): Promise<Application.Response> {
-    let handlers = this._router.handlersFor(request.method as HTTPVerb, request.url);
+    let ui = this.ui;
+    let { method: verb, url: path } = request;
+
+    ui.info({
+      name: "dispatch-start",
+      verb,
+      path
+    });
+
+    let handlers = this._router.handlersFor(verb as HTTPVerb, path);
 
     if (!handlers) {
+      ui.info({
+        name: "dispatch-not-found",
+        verb,
+        path
+      });
+
       response.setHeader("Content-Type", "text/html");
       response.statusCode = 404;
       response.write("<h2>Not found!</h2>");
@@ -54,18 +69,31 @@ class Application {
     for (let i = 0; i < handlers.length; i++) {
       let handler: Handler  = handlers[i].handler;
 
-      let controller = this._resolver.findController(handler.controller);
+      let controllerName = handler.controller;
+      let controller = this._resolver.findController(controllerName);
       let method = handler.method;
 
+      ui.info({
+        name: "dispatch-dispatching",
+        controller: controllerName,
+        verb,
+        path,
+        method
+      });
+
       if (method && controller[method]) {
-        result = controller[method]();
+        try {
+          result = Promise.resolve(controller[method]());
+        } catch (e) {
+          result = Promise.reject(e);
+        }
       }
 
       if (result) { break; }
     }
 
-    return Promise.resolve(result)
-      .then(model => {
+    return result
+      .then((model: Serializer.Serializable) => {
         let json: JSONAPI.Document;
 
         if (Array.isArray(model)) {
@@ -77,7 +105,13 @@ class Application {
         response.write(JSON.stringify(json));
         response.end();
       })
-      .then(() => response);
+      .then(() => response)
+      .catch((e: Error) => {
+        response.statusCode = 500;
+        response.write(e.stack);
+        response.end();
+      });
+
   }
 }
 

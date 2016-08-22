@@ -32,8 +32,8 @@ describe("route dispatching", function() {
     it("routes GET /<resource> to controller's index() method", async function() {
 
       let app = await test.createApplication()
-        .routes(function() {
-          this.resource("photos");
+        .routes(({ resources }) => {
+          resources("photos");
         })
         .controller("photos", PhotoController)
         .model("photo", Photo)
@@ -79,8 +79,8 @@ describe("route dispatching", function() {
       }
 
       let app = await test.createApplication()
-        .routes(function() {
-          this.resource("photos");
+        .routes(({ resources }) => {
+          resources("photos");
         })
         .controller("photos", PromisePhotoController)
         .model("photo", Photo)
@@ -103,5 +103,26 @@ describe("route dispatching", function() {
       });
     });
 
+    it("reports 500 if error during dispatching", async function() {
+      class ErrorPhotoController extends Controller {
+        index() {
+          throw new Error();
+        }
+      }
+
+      let app = await test.createApplication()
+        .routes(({ resources }) => {
+          resources("photos");
+        })
+        .controller("photos", ErrorPhotoController)
+        .boot();
+
+      let request = test.createRequest("/photos");
+      let response = test.createResponse();
+
+      await app.dispatch(request, response);
+
+      expect(response.statusCode).to.equal(500);
+    });
   });
 });

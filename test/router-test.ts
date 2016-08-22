@@ -7,8 +7,8 @@ describe("Router", () => {
 
     it("supports simple routes", () => {
       class MyRouter extends Router {
-        map() {
-          this.resource("my-route");
+        map({ resources }: Router.DSL) {
+          resources("my-route");
         }
       }
 

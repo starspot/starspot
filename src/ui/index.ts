@@ -1,8 +1,6 @@
 import { inspect } from "util";
 import * as chalk from "chalk";
 
-import formatters from "./formatters";
-
 export type Category = "info" | "warn" | "error";
 
 const COLORS: { [index: string]: [Function, Function]} = {
@@ -11,26 +9,30 @@ const COLORS: { [index: string]: [Function, Function]} = {
   error: [chalk.bgRed.white, chalk.red]
 };
 
-export default class UI {
-  private logLevel = LogLevel.Info;
+class UI {
+  private logLevel = UI.LogLevel.Info;
   private lastCategory: Category = null;
 
+  constructor(options: ConstructorOptions = {}) {
+    this.logLevel = options.logLevel || this.logLevel;
+  }
+
   info(event: Event) {
-    if (this.logLevel > LogLevel.Info) { return; }
+    if (this.logLevel > UI.LogLevel.Info) { return; }
 
     event.category = "info";
     this._log(event);
   }
 
   warn(event: Event) {
-    if (this.logLevel > LogLevel.Warn) { return; }
+    if (this.logLevel > UI.LogLevel.Warn) { return; }
 
     event.category = "warn";
     this._log(event);
   }
 
   error(event: Event) {
-    if (this.logLevel > LogLevel.Error) { return; }
+    if (this.logLevel > UI.LogLevel.Error) { return; }
 
     event.category = "error";
     this._log(event);
@@ -39,7 +41,6 @@ export default class UI {
   _log(event: Event) {
     let { category } = event;
     let [categoryColor, color] = COLORS[category];
-    let formatter = formatters[category] && formatters[category][event.name];
     let message: string;
 
     let printCategory = false;
@@ -51,28 +52,32 @@ export default class UI {
 
     this.lastCategory = category;
 
-    if (formatter) {
-      message = formatter(event);
-    } else {
-      message = inspect(event);
-    }
+    message = inspect(event);
 
     let formattedCategory = printCategory ? categoryColor(` ${category.toUpperCase()} `) : " ".repeat(category.length + 2);
     console.log(formattedCategory, color(message));
   }
 }
 
-export enum LogLevel {
-  VeryVerbose,
-  Verbose,
-  Info,
-  Warn,
-  Error
+namespace UI {
+  export enum LogLevel {
+    VeryVerbose,
+    Verbose,
+    Info,
+    Warn,
+    Error
+  }
+}
+
+export default UI;
+
+export interface ConstructorOptions {
+  logLevel?: UI.LogLevel;
 }
 
 export interface Event {
   name: string;
   category?: Category;
-  logLevel?: LogLevel;
+  logLevel?: UI.LogLevel;
   [key: string]: any;
 };
