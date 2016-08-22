@@ -98,7 +98,6 @@ class Application {
         }
 
         if (request.headers["accept"].split(",").map((s: string) => s.split(";")[0]).indexOf("text/html") > -1) {
-          console.log("serializing: ", json || model);
           this.sendJSONAsHTML(json || model, response);
         } else {
           response.setHeader("Content-Type", "application/json");
