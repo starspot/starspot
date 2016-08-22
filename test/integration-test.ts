@@ -9,10 +9,12 @@ describe("route dispatching", function() {
     it("passes the response to the controller", async function() {
       let request = test.createRequest("/photos");
       let response = test.createResponse();
+      let wasDispatched = false;
 
       class PhotoController extends Controller {
         show({ response: passedResponse }: Controller.Parameters) {
           expect(passedResponse).to.equal(response);
+          wasDispatched = true;
         }
       }
 
@@ -24,6 +26,7 @@ describe("route dispatching", function() {
         .boot();
 
       await app.dispatch(request, response);
+      expect(wasDispatched).to.be.true;
     });
   });
 
