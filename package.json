@@ -1,6 +1,6 @@
 {
   "name": "starspot",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "TypeScript-based framework for Node.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
