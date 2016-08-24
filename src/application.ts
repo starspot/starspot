@@ -40,6 +40,8 @@ class Application {
   }
 
   dispatch(request: Application.Request, response: Application.Response): Promise<Application.Response> {
+    let startTime = process.hrtime();
+
     let ui = this.ui;
     let { method: verb, url: path } = request;
 
@@ -105,8 +107,18 @@ class Application {
         }
 
         response.end();
+
+        this.ui.info({
+          name: "dispatch-complete",
+          controller: controllerName,
+          verb,
+          path,
+          method,
+          time: process.hrtime(startTime)
+        });
+
+        return response;
       })
-      .then(() => response)
       .catch((e: Error) => {
         response.statusCode = 500;
         response.write(e.stack);
