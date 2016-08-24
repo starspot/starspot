@@ -3,7 +3,7 @@ import Router, { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
 import JSONAPI from "./json-api/interfaces";
 import Resolver from "./resolver";
-import jsonToHTML from "./util/json-to-html";
+import { jsonToHTMLDocument } from "./util/json-to-html";
 
 export interface ConstructorOptions {
   ui?: UI;
@@ -137,7 +137,7 @@ class Application {
 
     response.setHeader("Content-Type", "text/html");
     response.statusCode = 404;
-    response.end(jsonToHTML({
+    response.end(jsonToHTMLDocument({
       error: "Controller method not found",
       controller,
       method,
@@ -148,7 +148,7 @@ class Application {
 
   sendJSONAsHTML(json: any, response: Application.Response)  {
     response.setHeader("Content-Type", "text/html");
-    response.end(jsonToHTML(json));
+    response.end(jsonToHTMLDocument(json));
   }
 }
 

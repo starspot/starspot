@@ -276,6 +276,10 @@ function isEmpty(object: any): boolean {
   return Object.keys(object).length === 0;
 }
 
-export default function jsonToHTML(json: Dict) {
-  return wrapInDocument(new JSONHTMLSerializer(json).toHTML());
+export function jsonToHTML(json: Dict) {
+  return new JSONHTMLSerializer(json).toHTML();
+}
+
+export function jsonToHTMLDocument(json: Dict) {
+  return wrapInDocument(jsonToHTML(json));
 }

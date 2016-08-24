@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import jsonToHTML from "../src/util/json-to-html";
+import { jsonToHTML } from "../src/util/json-to-html";
 
 describe("JSON to HTML serialization", function() {
 
