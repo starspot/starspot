@@ -6,6 +6,10 @@ interface TypeCache {
   [key: string]: any;
 }
 
+interface FileMap {
+  [key: string]: [string, Key];
+}
+
 export type Key = string | symbol;
 
 export interface Factory {
@@ -15,6 +19,7 @@ export interface Factory {
 class Resolver {
   private factoryCache: Cache = { };
   private instanceCache: Cache = { };
+  private fileMap: FileMap = { };
 
   constructor(private rootPath?: string) {
 
@@ -30,6 +35,17 @@ class Resolver {
 
   findController(controllerName: string) {
     return this.findInstance("controller", controllerName);
+  }
+
+  pathDidChange(path: string) {
+    let [type, name] = this.fileMap[path];
+    if (!type) { return; }
+
+    let cache = cacheFor(this.factoryCache, type);
+    cache[name] = null;
+
+    cache = cacheFor(this.instanceCache, type);
+    cache[name] = null;
   }
 
   findInstance(type: string, name: Key) {
@@ -52,8 +68,9 @@ class Resolver {
 
     if (cache[name]) { return cache[name]; }
 
+    console.log("ROOT PATH", this.rootPath);
     if (!this.rootPath) {
-      name = name.toString();
+      name = String(name);
       throw new Error(`The resolver's rootPath wasn't set, so it can't automatically look up the ${name} ${type}. Either register the ${name} ${type} ahead of time, or set a rootPath.`);
     }
 
@@ -65,6 +82,7 @@ class Resolver {
       factoryPath = `${this.rootPath}/resources/${name}/${type}`;
     }
 
+    this.fileMap[factoryPath] = [type, name];
     return cache[name] = require(factoryPath).default;
   }
 }
