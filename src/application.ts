@@ -16,7 +16,6 @@ class Application {
 
   private _rootPath: string;
   private _resolver: Resolver;
-  private _router: Router;
   private _serializer: Serializer;
 
   constructor(options: ConstructorOptions = {}) {
@@ -33,9 +32,6 @@ class Application {
       resolver = this._resolver = new Resolver(this._rootPath);
     }
 
-    let router = this._router = this._resolver.findInstance("router", Resolver.MAIN);
-    router.seal();
-
     this._serializer = new Serializer();
   }
 
@@ -51,7 +47,9 @@ class Application {
       path
     });
 
-    let handlers = this._router.handlersFor(verb as HTTPVerb, path);
+    let router = this._resolver.findInstance("router", Resolver.MAIN);
+    router.seal();
+    let handlers = router.handlersFor(verb as HTTPVerb, path);
 
     if (!handlers) {
       this.routeNotFound(request, response, verb, path);
