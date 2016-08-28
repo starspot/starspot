@@ -159,7 +159,7 @@ class Application {
   }
 
   sendJSONAsHTML(json: any, response: Application.Response)  {
-    response.setHeader("Content-Type", "text/html");
+    response.setHeader("Content-Type", "text/html; charset=utf-8");
     response.end(jsonToHTMLDocument(json));
   }
 }
