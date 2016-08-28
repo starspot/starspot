@@ -37,15 +37,20 @@ class Resolver {
     return this.findInstance("controller", controllerName);
   }
 
-  pathDidChange(path: string) {
-    let [type, name] = this.fileMap[path];
-    if (!type) { return; }
+  fileDidChange(path: string) {
+    path = path.split(".").slice(0, -1).join(".");
+    let fileInfo = this.fileMap[path];
+    if (!fileInfo) { return; }
+
+    let [type, name] = fileInfo;
 
     let cache = cacheFor(this.factoryCache, type);
     cache[name] = null;
 
     cache = cacheFor(this.instanceCache, type);
     cache[name] = null;
+
+    delete require.cache[require.resolve(path)];
   }
 
   findInstance(type: string, name: Key) {
@@ -68,7 +73,6 @@ class Resolver {
 
     if (cache[name]) { return cache[name]; }
 
-    console.log("ROOT PATH", this.rootPath);
     if (!this.rootPath) {
       name = String(name);
       throw new Error(`The resolver's rootPath wasn't set, so it can't automatically look up the ${name} ${type}. Either register the ${name} ${type} ahead of time, or set a rootPath.`);
