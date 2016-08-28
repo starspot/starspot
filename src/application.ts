@@ -1,5 +1,5 @@
 import UI from "./ui";
-import Router, { Handler, HTTPVerb } from "./router";
+import { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
 import JSONAPI from "./json-api/interfaces";
 import Resolver from "./resolver";
