@@ -5,21 +5,17 @@ import JSONAPI from "./json-api/interfaces";
 import Resolver from "./resolver";
 import { jsonToHTMLDocument } from "./util/json-to-html";
 
-export interface ConstructorOptions {
-  ui?: UI;
-  rootPath?: string;
-  resolver?: Resolver;
-}
-
 class Application {
   protected ui: UI;
+  protected initializers: Application.Initializer[];
 
   private _rootPath: string;
   private _resolver: Resolver;
   private _serializer: Serializer;
 
-  constructor(options: ConstructorOptions = {}) {
+  constructor(options: Application.ConstructorOptions = {}) {
     this.ui = options.ui || new UI();
+    this.initializers = options.initializers || [];
 
     this._rootPath = options.rootPath;
     this._resolver = options.resolver;
@@ -33,6 +29,14 @@ class Application {
     }
 
     this._serializer = new Serializer();
+
+    this.invokeInitializers();
+  }
+
+  invokeInitializers() {
+    this.initializers.forEach(initializer => {
+      initializer.initialize(this);
+    });
   }
 
   dispatch(request: Application.Request, response: Application.Response): Promise<Application.Response> {
@@ -175,6 +179,18 @@ namespace Application {
     setHeader(header: string, value: string): void;
     write(chunk: Buffer | string, cb?: Function): boolean;
     end(chunk?: Buffer | string): void;
+  }
+
+  export interface Initializer {
+    name: string;
+    initialize: (app: Application) => void;
+  };
+
+  export interface ConstructorOptions {
+    ui?: UI;
+    rootPath?: string;
+    resolver?: Resolver;
+    initializers?: Application.Initializer[];
   }
 }
 
