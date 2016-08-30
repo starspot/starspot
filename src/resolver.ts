@@ -22,7 +22,12 @@ export interface InjectionOptions {
   with: TypeNamePair;
   /** Set the injected value to this property name */
   as: string;
+
+  /** Optional name for this injection used for debugging */
+  annotation?: string;
 }
+
+const ALL = Symbol("all");
 
 class Resolver {
   private factoryCache: Cache = { };
@@ -43,8 +48,18 @@ class Resolver {
     cacheFor(this.factoryRegistrations, type)[name] = factory;
   }
 
-  inject(type: string, name: Key, options: InjectionOptions) {
-    let injections = this.injectionsFor(type, name);
+  inject(target: TypeNamePair, options: InjectionOptions): void;
+  inject(type: string, options: InjectionOptions): void;
+  inject(target: any, options: InjectionOptions) {
+    let injections: InjectionOptions[];
+
+    if (typeof target === "string") {
+      injections = this.injectionsFor(target);
+    } else {
+      let [type, name] = target;
+      injections = this.injectionsFor(type, name);
+    }
+
     injections.push(options);
   }
 
@@ -111,7 +126,7 @@ class Resolver {
     return cache[name] = this.buildFactoryWithInjections(type, name, factory);
   }
 
-  injectionsFor(type: string, name: Key): InjectionOptions[] {
+  injectionsFor(type: string, name: Key = ALL): InjectionOptions[] {
     let typeInjections = cacheFor(this.injectionsMap, type);
     let injections = typeInjections[name];
 
@@ -124,8 +139,24 @@ class Resolver {
 
   buildFactoryWithInjections(type: string, name: Key, factory: Factory): any {
     let injections = this.injectionsFor(type, name);
+    let typeInjections = this.injectionsFor(type);
 
-    if (!injections || injections.length === 0) { return factory; }
+    if (!injections && !typeInjections) { return factory; }
+
+    injections = injections || [];
+    typeInjections = typeInjections || [];
+
+    if (!injections.length && !typeInjections.length) { return factory; }
+
+    injections = injections.concat(typeInjections);
+
+    injections.filter(injection => {
+      let [withType, withName] = injection.with;
+      if (withType === type && withName === name) {
+        let annotation = injection.annotation || "an injection";
+        throw new Error(`Circular injection detected: injection "${annotation}" attempted to inject ${name} ${type} into itself.`);
+      }
+    });
 
     let resolver = this;
 

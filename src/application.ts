@@ -6,11 +6,12 @@ import Resolver from "./resolver";
 import { jsonToHTMLDocument } from "./util/json-to-html";
 
 class Application {
+  public resolver: Resolver;
+
   protected ui: UI;
   protected initializers: Application.Initializer[];
 
   private _rootPath: string;
-  private _resolver: Resolver;
   private _serializer: Serializer;
 
   constructor(options: Application.ConstructorOptions = {}) {
@@ -18,14 +19,14 @@ class Application {
     this.initializers = options.initializers || [];
 
     this._rootPath = options.rootPath;
-    this._resolver = options.resolver;
+    this.resolver = options.resolver;
   }
 
   async boot() {
-    let resolver = this._resolver;
+    let resolver = this.resolver;
 
     if (!resolver) {
-      resolver = this._resolver = new Resolver(this._rootPath);
+      resolver = this.resolver = new Resolver(this._rootPath);
     }
 
     this._serializer = new Serializer();
@@ -51,7 +52,7 @@ class Application {
       path
     });
 
-    let router = this._resolver.findInstance("router", Resolver.MAIN);
+    let router = this.resolver.findInstance("router", Resolver.MAIN);
     router.seal();
     let handlers = router.handlersFor(verb as HTTPVerb, path);
 
@@ -65,7 +66,7 @@ class Application {
     let handler: Handler  = handlers[0].handler;
 
     let controllerName = handler.controller;
-    let controller = this._resolver.findController(controllerName);
+    let controller = this.resolver.findController(controllerName);
     let method = handler.method;
 
     ui.info({
