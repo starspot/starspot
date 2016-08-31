@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import fixture from "./helpers/fixture";
 import Resolver from "../src/resolver";
 import Container from "../src/container";
 
@@ -74,7 +75,3 @@ describe("Resolver", function() {
   });
 
 });
-
-function fixture(name: string): string {
-  return __dirname + "/fixtures/" + name;
-}

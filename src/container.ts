@@ -32,6 +32,11 @@ export interface InjectionOptions {
 
 const ALL = Symbol("all");
 
+export interface ConstructorOptions {
+  rootPath?: string;
+  resolver?: Resolver;
+}
+
 class Container {
   public resolver: Resolver;
 
@@ -43,8 +48,9 @@ class Container {
   private injectionsMap: Cache = { };
   private fileMap: FileMap = { };
 
-  constructor(rootPath?: string) {
-    this.resolver = new Resolver({ rootPath });
+  constructor(options: ConstructorOptions = {}) {
+    let rootPath = options.rootPath;
+    this.resolver = options.resolver || new Resolver({ rootPath });
   }
 
   static metaFor(instance: any): Container.Meta {
@@ -97,7 +103,10 @@ class Container {
     let cache = cacheFor(this.moduleCache, type);
     if (cache[name]) { return cache[name]; }
 
-    let [mod, modulePath] = this.resolver.resolve<any>([type, name]);
+    let resolution = this.resolver.resolve<any>([type, name]);
+    if (!resolution) { return null; }
+
+    let [mod, modulePath] = resolution;
 
     this.fileMap[modulePath] = [type, name];
 
@@ -110,12 +119,12 @@ class Container {
     if (cache[name]) { return cache[name]; }
 
     let Factory = this.findFactory(type, name);
-    let instance = new Factory();
+    if (!Factory) { return null; }
 
+    let instance = new Factory();
     instance[Container.META] = { name, container: this };
 
     cache[name] = instance;
-
     return instance;
   }
 
@@ -128,11 +137,10 @@ class Container {
       return this.buildFactoryWithInjections(type, name, registrations[name]);
     }
 
-    let [factory, factoryPath] = this.resolver.resolve<Factory>([type, name]);
+    let Factory = this.findModule(type, name);
+    if (!Factory) { return null; }
 
-    this.fileMap[factoryPath] = [type, name];
-
-    return cache[name] = this.buildFactoryWithInjections(type, name, factory);
+    return cache[name] = this.buildFactoryWithInjections(type, name, Factory);
   }
 
   injectionsFor(type: string, name: Key = ALL): InjectionOptions[] {

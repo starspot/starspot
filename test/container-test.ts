@@ -1,7 +1,23 @@
 import { expect } from "chai";
+import fixture from "./helpers/fixture";
+
 import Container from "../src/container";
 
 describe("Container", function() {
+
+  it("resolves to a null value if entity cannot be found", function() {
+    let container = new Container({
+      rootPath: fixture("resolver")
+    });
+
+    let value = container.findFactory("controller", "nonexistent");
+    expect(value).to.be.null;
+
+    value = container.findInstance("controller", "nonexistent");
+    expect(value).to.be.null;
+
+    value = container.findModule("controller", "nonexistent");
+  });
 
   it("allows explicitly registering factories", function() {
     let container = new Container();

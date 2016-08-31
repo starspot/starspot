@@ -24,7 +24,9 @@ class Application {
     this._rootPath = options.rootPath;
     this._serializer = new Serializer();
 
-    this.container = options.container || new Container(this._rootPath);
+    this.container = options.container || new Container({
+      rootPath: this._rootPath
+    });
   }
 
   async boot() {
