@@ -1,202 +1,130 @@
-interface Cache {
-  [key: string]: TypeCache;
+import * as inflected from "inflected";
+import { relative } from "path";
+import Container, { Entity } from "./container";
+import StarspotError from "./errors/starspot-error";
+
+export interface PathMapper {
+  (entity: Entity): string;
 }
 
-interface TypeCache {
-  [key: string]: any;
+const MAIN_MODULES: PathMapper = function([type, name]) {
+  if (name === Container.MAIN) {
+    return `app/${type}`;
+  }
+};
+
+const CONFIG_MODULES: PathMapper = function([type, name]) {
+  if (type === "config") {
+    return `config/${name}`;
+  }
+};
+
+const RESOURCE_MODULES: PathMapper = function([type, name]) {
+  if (typeof name === "string") {
+    return `app/resources/${name}/${type}`;
+  }
+};
+
+const CROSSCUTTING_MODULES: PathMapper = function([type, name]) {
+  if (typeof name === "string") {
+    let pluralizedType = inflected.pluralize(type);
+    return `app/${pluralizedType}/${name}`;
+  }
+};
+
+export interface Dict<T> {
+  [key: string]: T;
 }
 
-interface FileMap {
-  [key: string]: [string, Key];
+export type Resolution<T> = [T, string];
+
+export interface ConstructorOptions {
+  /** Whether to throw an error if a lookup results in more than one matching
+   *  module for the same entity. */
+  throwOnConflict?: boolean;
+  rootPath?: string;
 }
 
-export type Key = string | symbol;
+export default class Resolver {
+  public mappers = [MAIN_MODULES, CONFIG_MODULES, RESOURCE_MODULES, CROSSCUTTING_MODULES];
+  public perTypeMappers: Dict<PathMapper[]> = {
+    config: [CONFIG_MODULES]
+  };
+  public throwOnConflict: boolean;
+  public rootPath: string;
 
-export interface Factory {
-  new (...args: any[]): any;
-}
-
-export type TypeNamePair = [string, Key];
-export interface InjectionOptions {
-  /** The resolver type and name to inject into */
-  with: TypeNamePair;
-  /** Set the injected value to this property name */
-  as: string;
-
-  /** Optional name for this injection used for debugging */
-  annotation?: string;
-}
-
-const ALL = Symbol("all");
-
-class Resolver {
-  private factoryCache: Cache = { };
-  private instanceCache: Cache = { };
-  private factoryRegistrations: Cache = { };
-  private injectionsMap: Cache = { };
-  private fileMap: FileMap = { };
-
-  constructor(private rootPath?: string) {
-
+  constructor(options: ConstructorOptions = {}) {
+    this.throwOnConflict = options.throwOnConflict || false;
+    this.rootPath = options.rootPath;
   }
 
-  static metaFor(instance: any): Resolver.Meta {
-    return instance[Resolver.META];
-  }
-
-  registerFactory(type: string, name: Key, factory: Factory): void {
-    cacheFor(this.factoryRegistrations, type)[name] = factory;
-  }
-
-  inject(target: TypeNamePair, options: InjectionOptions): void;
-  inject(type: string, options: InjectionOptions): void;
-  inject(target: any, options: InjectionOptions) {
-    let injections: InjectionOptions[];
-
-    if (typeof target === "string") {
-      injections = this.injectionsFor(target);
-    } else {
-      let [type, name] = target;
-      injections = this.injectionsFor(type, name);
-    }
-
-    injections.push(options);
-  }
-
-  findController(controllerName: string) {
-    return this.findInstance("controller", controllerName);
-  }
-
-  fileDidChange(path: string) {
-    path = path.split(".").slice(0, -1).join(".");
-    let fileInfo = this.fileMap[path];
-    if (!fileInfo) { return; }
-
-    let [type, name] = fileInfo;
-
-    let cache = cacheFor(this.factoryCache, type);
-    cache[name] = null;
-
-    cache = cacheFor(this.instanceCache, type);
-    cache[name] = null;
-
-    delete require.cache[require.resolve(path)];
-  }
-
-  findInstance(type: string, name: Key) {
-    let cache = cacheFor(this.instanceCache, type);
-
-    if (cache[name]) { return cache[name]; }
-
-    let Factory = this.findFactory(type, name);
-    let instance = new Factory();
-
-    instance[Resolver.META] = { name, resolver: this };
-
-    cache[name] = instance;
-
-    return instance;
-  }
-
-  findFactory(type: string, name: Key) {
-    let cache = cacheFor(this.factoryCache, type);
-    if (cache[name]) { return cache[name]; }
-
-    let registrations = cacheFor(this.factoryRegistrations, type);
-    if (registrations[name]) {
-      return this.buildFactoryWithInjections(type, name, registrations[name]);
-    }
-
+  resolve<T>(entity: Entity): Resolution<T> {
     if (!this.rootPath) {
-      name = String(name);
-      throw new Error(`The resolver's rootPath wasn't set, so it can't automatically look up the ${name} ${type}. Either register the ${name} ${type} ahead of time, or set a rootPath.`);
+      let [type, name] = entity;
+      throw new Error(`The resolver's rootPath wasn't set, so it can't automatically look up the ${String(name)} ${type}. Either register the ${name} ${type} ahead of time, or set a rootPath.`);
     }
 
-    let factoryPath: string;
+    let potentialPaths = this.resolvePaths(entity);
 
-    if (name === Resolver.MAIN) {
-      factoryPath = `${this.rootPath}/${type}`;
-    } else {
-      factoryPath = `${this.rootPath}/resources/${name}/${type}`;
+    if (this.throwOnConflict) {
+      this.detectConflictingFiles(entity, potentialPaths);
     }
 
-    this.fileMap[factoryPath] = [type, name];
-    let factory = require(factoryPath).default;
+    for (let i = 0; i < potentialPaths.length; i++) {
+      let path = potentialPaths[i];
+      let absolutePath = this.rootPath + "/" + path;
+      let mod: any;
 
-    return cache[name] = this.buildFactoryWithInjections(type, name, factory);
-  }
-
-  injectionsFor(type: string, name: Key = ALL): InjectionOptions[] {
-    let typeInjections = cacheFor(this.injectionsMap, type);
-    let injections = typeInjections[name];
-
-    if (!injections) {
-      injections = typeInjections[name] = [];
-    }
-
-    return injections;
-  }
-
-  buildFactoryWithInjections(type: string, name: Key, factory: Factory): any {
-    let injections = this.injectionsFor(type, name);
-    let typeInjections = this.injectionsFor(type);
-
-    if (!injections && !typeInjections) { return factory; }
-
-    injections = injections || [];
-    typeInjections = typeInjections || [];
-
-    if (!injections.length && !typeInjections.length) { return factory; }
-
-    injections = injections.concat(typeInjections);
-
-    injections.filter(injection => {
-      let [withType, withName] = injection.with;
-      if (withType === type && withName === name) {
-        let annotation = injection.annotation || "an injection";
-        throw new Error(`Circular injection detected: injection "${annotation}" attempted to inject ${name} ${type} into itself.`);
-      }
-    });
-
-    let resolver = this;
-
-    return function() {
-      let instance = new factory(...arguments);
-
-      for (let i = 0; i < injections.length; i++) {
-        let injection = injections[0];
-        let [injectionType, injectionName] = injection.with;
-
-        instance[injection.as] = resolver.findInstance(injectionType, injectionName);
+      try {
+        mod = require(absolutePath);
+      } catch (e) {
+        continue;
       }
 
-      return instance;
-    };
+      // For error messages and autoreloading, we need to know the full,
+      // resolved path with appropriate file extension, e.g., was it a .ts file
+      // or a .js file?
+      absolutePath = require.resolve(absolutePath);
+
+      if (!mod.hasOwnProperty("default")) {
+        throw new StarspotError({
+          name: "no-default-export",
+          path: relative(this.rootPath, absolutePath)
+        });
+      }
+
+      return [mod.default, absolutePath];
+    }
+  }
+
+  resolvePaths(entity: Entity) {
+    let type = entity[0];
+
+    return (this.perTypeMappers[type] || this.mappers)
+      .map(m => m(entity))
+      .filter(p => p);
+  }
+
+  detectConflictingFiles([type, name]: Entity, paths: string[]) {
+    function exists(path: string) {
+      try {
+        return require.resolve(this.rootPath + "/" + path);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    let foundFiles = paths
+      .map(exists)
+      .filter(p => p);
+
+    if (foundFiles.length > 1) {
+      throw new StarspotError({
+        name: "conflicting-modules",
+        entityName: name,
+        entityType: type,
+        paths: foundFiles
+      });
+    }
   }
 }
-
-namespace Resolver {
-  export const MAIN = Symbol("resolver main");
-  export const META = Symbol("meta");
-
-  export interface Meta {
-    name: string;
-    resolver: Resolver;
-  }
-
-  export interface Result {
-    [meta: string]: Meta;
-  }
-}
-
-function cacheFor(cache: Cache, type: string): TypeCache {
-  let typeCache = cache[type];
-
-  if (!typeCache) {
-    typeCache = cache[type] = {};
-  }
-
-  return typeCache;
-}
-
-export default Resolver;

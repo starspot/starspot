@@ -1,5 +1,5 @@
 import Application from "./application";
-import Resolver from "./resolver";
+import Container from "./container";
 import Model from "./model";
 
 interface Controller {
@@ -12,8 +12,8 @@ interface Controller {
 
 class Controller {
   createModel(modelName: string): Model {
-    let resolver = Resolver.metaFor(this).resolver;
-    return resolver.findInstance("model", modelName);
+    let container = Container.metaFor(this).container;
+    return container.findInstance("model", modelName);
   }
 }
 

@@ -1,88 +1,80 @@
 import { expect } from "chai";
 import Resolver from "../src/resolver";
+import Container from "../src/container";
 
 describe("Resolver", function() {
 
-  it("allows explicitly registering factories", function() {
+  it("resolves paths for MAIN entities", function() {
     let resolver = new Resolver();
+    let paths = resolver.resolvePaths(["router", Container.MAIN]);
 
-    class PhotosController {
-      isPhotosFactory = true;
-    }
-
-    resolver.registerFactory("controller", "photos", PhotosController);
-
-    let controller = resolver.findInstance("controller", "photos");
-    expect(controller.isPhotosFactory).to.be.true;
-
-    let Factory = resolver.findFactory("controller", "photos");
-    controller = new Factory();
-    expect(controller.isPhotosFactory).to.be.true;
+    expect(paths).to.deep.equal([
+      "app/router"
+    ]);
   });
 
-  it("injects properties into specific objects", function() {
+  it("resolves paths for config modules", function() {
     let resolver = new Resolver();
+    let paths = resolver.resolvePaths(["config", "database"]);
 
-    class PhotosController {
-      isPhotosFactory = true;
-    }
-
-    class PostsController {
-      isPostsController = true;
-    }
-
-    resolver.registerFactory("controller", "photos", PhotosController);
-    resolver.registerFactory("controller", "posts", PostsController);
-
-    resolver.inject(["controller", "photos"], {
-      with: ["controller", "posts"],
-      as: "posts"
-    });
-
-    let photosController = resolver.findInstance("controller", "photos");
-    let postsController = resolver.findInstance("controller", "posts");
-    expect(photosController.posts).to.equal(postsController);
-    expect(photosController.constructor).to.equal(PhotosController);
-    expect(photosController).to.be.an.instanceof(PhotosController);
-
-    let Factory = resolver.findFactory("controller", "photos");
-    photosController = new Factory();
-    expect(photosController.posts).to.equal(postsController);
-    expect(photosController.constructor).to.equal(PhotosController);
-    expect(photosController).to.be.an.instanceof(PhotosController);
+    expect(paths).to.deep.equal([
+      "config/database"
+    ]);
   });
 
-  it("injects properties into types of objects", function() {
+  it("resolves paths for resource modules", function() {
     let resolver = new Resolver();
+    let paths = resolver.resolvePaths(["controller", "photos"]);
 
-    class PhotosController {
-      isPhotosFactory = true;
-    }
+    expect(paths).to.deep.equal([
+      "app/resources/photos/controller",
+      "app/controllers/photos"
+    ]);
+  });
 
-    class DBService {
-      isDBService = true;
-    }
-
-    resolver.registerFactory("controller", "photos", PhotosController);
-    resolver.registerFactory("service", "db", DBService);
-
-    resolver.inject("controller", {
-      with: ["service", "db"],
-      as: "db",
-      annotation: "inject-db-into-controllers"
+  it("throws if a module is found without a default export", function() {
+    let resolver = new Resolver({
+      rootPath: fixture("resolver")
     });
 
-    let photosController = resolver.findInstance("controller", "photos");
-    let dbService = resolver.findInstance("service", "db");
-    expect(photosController.db).to.equal(dbService);
-    expect(photosController.constructor).to.equal(PhotosController);
-    expect(photosController).to.be.an.instanceof(PhotosController);
+    expect(function() {
+      resolver.resolve(["controller", "no-default-export"]);
+    }).to.throw("no-default-export");
+  });
 
-    let Factory = resolver.findFactory("controller", "photos");
-    photosController = new Factory();
-    expect(photosController.db).to.equal(dbService);
-    expect(photosController.constructor).to.equal(PhotosController);
-    expect(photosController).to.be.an.instanceof(PhotosController);
+  it("requires the first-available resolved path", function() {
+    let resolver = new Resolver({
+      rootPath: fixture("resolver")
+    });
+
+    let [controller] = resolver.resolve<any>(["controller", "photos"]);
+    expect(controller.isPhotosController).to.be.true;
+
+    [controller] = resolver.resolve<any>(["controller", "posts"]);
+    expect(controller.isPostsController).to.be.true;
+  });
+
+  it("throws if conflicting modules exist on disk", function() {
+    let resolver = new Resolver({
+      rootPath: fixture("resolver"),
+      throwOnConflict: true
+    });
+
+    try {
+      resolver.resolve(["controller", "ambiguous"]);
+    } catch (e) {
+      expect(e.name).to.equal("conflicting-modules");
+      expect(e.entityName).to.equal("ambiguous");
+      expect(e.entityType).to.equal("controller");
+      expect(e.paths).to.deep.equal([
+        "app/controllers/ambiguous",
+        "app/resources/ambiguous/controller"
+      ]);
+    }
   });
 
 });
+
+function fixture(name: string): string {
+  return __dirname + "/fixtures/" + name;
+}

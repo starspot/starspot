@@ -1,7 +1,7 @@
 import {
   Application,
   Router,
-  Resolver,
+  Container,
   Controller,
   Model,
   UI
@@ -52,11 +52,11 @@ export function createResponse(): FakeResponse {
 }
 
 export function createApplication(routes?: Function) {
-  let resolver = new Resolver();
+  let container = new Container();
   let ui = new UI({ logLevel: UI.LogLevel.Error });
-  let app = new Application({ resolver, ui });
+  let app = new Application({ container, ui });
 
-  return new ApplicationBuilderDSL(app, resolver);
+  return new ApplicationBuilderDSL(app, container);
 }
 
 export interface Factory {
@@ -65,7 +65,7 @@ export interface Factory {
 
 export class ApplicationBuilderDSL {
   constructor(private app: Application,
-              private resolver: Resolver) { }
+              private resolver: Container) { }
 
   controller(name: string, klass: typeof Controller & Factory) {
     this.resolver.registerFactory("controller", name, klass);
@@ -73,7 +73,7 @@ export class ApplicationBuilderDSL {
   }
 
   routes(cb: (dsl: Router.DSL) => void) {
-    this.resolver.registerFactory("router", Resolver.MAIN, class extends Router {
+    this.resolver.registerFactory("router", Container.MAIN, class extends Router {
       map(dsl: Router.DSL) {
         cb(dsl);
       }

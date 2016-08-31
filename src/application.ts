@@ -2,36 +2,44 @@ import UI from "./ui";
 import { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
 import JSONAPI from "./json-api/interfaces";
-import Resolver from "./resolver";
+import Container from "./container";
+import Environment from "./environment";
 import { jsonToHTMLDocument } from "./util/json-to-html";
 
 class Application {
-  public resolver: Resolver;
+  public container: Container;
 
   protected ui: UI;
   protected initializers: Application.Initializer[];
+  protected env: Environment;
 
   private _rootPath: string;
   private _serializer: Serializer;
 
   constructor(options: Application.ConstructorOptions = {}) {
     this.ui = options.ui || new UI();
+    this.env = options.env || new Environment();
     this.initializers = options.initializers || [];
 
     this._rootPath = options.rootPath;
-    this.resolver = options.resolver;
+    this._serializer = new Serializer();
+
+    this.container = options.container || new Container(this._rootPath);
   }
 
   async boot() {
-    let resolver = this.resolver;
-
-    if (!resolver) {
-      resolver = this.resolver = new Resolver(this._rootPath);
-    }
-
-    this._serializer = new Serializer();
-
     this.invokeInitializers();
+  }
+
+  configFor<T>(name: string): T {
+    let config = this.container.findModule("config", name);
+    let mode = this.env.mode;
+
+    if (typeof config === "function") {
+      return config(this.env);
+    } else {
+      return config[mode];
+    }
   }
 
   invokeInitializers() {
@@ -52,7 +60,7 @@ class Application {
       path
     });
 
-    let router = this.resolver.findInstance("router", Resolver.MAIN);
+    let router = this.container.findInstance("router", Container.MAIN);
     router.seal();
     let handlers = router.handlersFor(verb as HTTPVerb, path);
 
@@ -66,7 +74,7 @@ class Application {
     let handler: Handler  = handlers[0].handler;
 
     let controllerName = handler.controller;
-    let controller = this.resolver.findController(controllerName);
+    let controller = this.container.findController(controllerName);
     let method = handler.method;
 
     ui.info({
@@ -102,7 +110,7 @@ class Application {
           json = serializer.serialize(model);
         }
 
-        if (request.headers["accept"].split(",").map((s: string) => s.split(";")[0]).indexOf("text/html") > -1) {
+        if (expectsHTMLResponse(request)) {
           this.sendJSONAsHTML(json || model, response);
         } else {
           response.setHeader("Content-Type", "application/json");
@@ -127,7 +135,6 @@ class Application {
         response.write(e.stack);
         response.end();
       });
-
   }
 
   routeNotFound(_: Application.Request, response: Application.Response, verb: string, path: string): void {
@@ -167,6 +174,18 @@ class Application {
   }
 }
 
+function expectsHTMLResponse(request: Application.Request): boolean {
+  let accept = request.headers["accept"];
+
+  if (!accept) { return false; }
+
+  // Turns "text/plain; q=0.5, text/html, text/x-dvi; q=0.8, text/x-c" into
+  // ["text/plain", "text/html", "text/x-dvi", "text/x-c"]
+  let mediaRanges = accept.split(",").map((s: string) => s.split(";")[0].trim());
+
+  return mediaRanges.indexOf("text/html") > -1;
+}
+
 namespace Application {
   export interface Request {
     method: string;
@@ -190,8 +209,9 @@ namespace Application {
   export interface ConstructorOptions {
     ui?: UI;
     rootPath?: string;
-    resolver?: Resolver;
+    container?: Container;
     initializers?: Application.Initializer[];
+    env?: Environment;
   }
 }
 

@@ -1,11 +1,11 @@
 import JSONAPISerializer from "./json-api/serializer";
-import Resolver from "./resolver";
+import Container from "./container";
 
 export type ID = JSONAPISerializer.ID;
 
 class Serializer implements JSONAPISerializer.Protocol<Model> {
   getType(model: Model): string {
-    let meta = Resolver.metaFor(model);
+    let meta = Container.metaFor(model);
 
     if (meta && meta.name) {
       return meta.name;
