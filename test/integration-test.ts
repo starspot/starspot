@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Model, Controller } from "../src";
 import * as test from "./helpers/application";
 
-describe("route dispatching", function() {
+describe("Integration: Route Dispatching", function() {
 
   describe("responses", function() {
 
