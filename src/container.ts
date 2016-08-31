@@ -61,6 +61,11 @@ class Container {
     cacheFor(this.factoryRegistrations, type)[name] = factory;
   }
 
+  registerInstance(type: string, name: Key, instance: any): void {
+    cacheFor(this.instanceCache, type)[name] = instance;
+    this.brandInstance(instance, name);
+  }
+
   inject(target: Entity, options: InjectionOptions): void;
   inject(type: string, options: InjectionOptions): void;
   inject(target: any, options: InjectionOptions) {
@@ -122,7 +127,7 @@ class Container {
     if (!Factory) { return null; }
 
     let instance = new Factory();
-    instance[Container.META] = { name, container: this };
+    this.brandInstance(instance, name);
 
     cache[name] = instance;
     return instance;
@@ -141,6 +146,10 @@ class Container {
     if (!Factory) { return null; }
 
     return cache[name] = this.buildFactoryWithInjections(type, name, Factory);
+  }
+
+  brandInstance(instance: any, name: Key) {
+    instance[Container.META] = { name, container: this };
   }
 
   injectionsFor(type: string, name: Key = ALL): InjectionOptions[] {

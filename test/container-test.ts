@@ -36,6 +36,24 @@ describe("Container", function() {
     expect(controller.isPhotosFactory).to.be.true;
   });
 
+  it("allows explicitly registering instances", function() {
+    let container = new Container();
+
+    class PhotosController {
+      isPhotosFactory = true;
+    }
+
+    let ourController = new PhotosController();
+
+    container.registerInstance("controller", "photos", ourController);
+
+    let controller = container.findInstance("controller", "photos");
+    expect(controller.isPhotosFactory).to.be.true;
+    expect(controller).to.equal(ourController);
+
+    expect(Container.metaFor(controller).name).to.equal("photos");
+  });
+
   it("injects properties into specific objects", function() {
     let container = new Container();
 
