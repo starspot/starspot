@@ -11,7 +11,23 @@ class UI {
     this.inputStream = options.inputStream || process.stdin;
     this.outputStream = options.outputStream || process.stdout;
     this.errorStream = options.errorStream || process.stderr;
-    this.logLevel = options.logLevel || this.logLevel;
+
+    let logLevel = options.logLevel;
+    if (logLevel !== undefined) {
+      this.logLevel = logLevel;
+    } else {
+      logLevel = envLogLevel();
+      if (logLevel !== undefined) {
+        this.logLevel = logLevel;
+      }
+    }
+  }
+
+  veryVerbose(event: UI.Event, category?: UI.Category) {
+    if (this.logLevel > UI.LogLevel.VeryVerbose) { return; }
+
+    event.category = category || "info";
+    this._log(event);
   }
 
   verbose(event: UI.Event, category?: UI.Category) {
@@ -70,6 +86,17 @@ namespace UI {
     inputStream?: NodeJS.ReadableStream;
     outputStream?: NodeJS.WritableStream;
     errorStream?: NodeJS.WritableStream;
+  }
+}
+
+function envLogLevel() {
+  let logLevel = process.env.STARSPOT_LOG_LEVEL;
+  if (logLevel !== undefined) {
+    for (let key of Object.keys(UI.LogLevel)) {
+      if (key.toLowerCase() === logLevel.toLowerCase()) {
+        return (<any>UI.LogLevel)[key];
+      }
+    }
   }
 }
 
