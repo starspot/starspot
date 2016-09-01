@@ -1,5 +1,8 @@
 import * as inflected from "inflected";
 import { relative } from "path";
+
+import Environment from "./environment";
+import UI from "./ui";
 import Container, { Entity } from "./container";
 import StarspotError from "./errors/starspot-error";
 
@@ -43,18 +46,24 @@ export interface ConstructorOptions {
    *  module for the same entity. */
   throwOnConflict?: boolean;
   rootPath?: string;
+  env?: Environment;
+  ui?: UI;
 }
 
 export default class Resolver {
-  public mappers = [MAIN_MODULES, CONFIG_MODULES, RESOURCE_MODULES, CROSSCUTTING_MODULES];
+  public mappers = [MAIN_MODULES, RESOURCE_MODULES, CROSSCUTTING_MODULES];
   public perTypeMappers: Dict<PathMapper[]> = {
     config: [CONFIG_MODULES]
   };
-  public throwOnConflict: boolean;
   public rootPath: string;
 
+  private ui: UI;
+  private env: Environment;
+
   constructor(options: ConstructorOptions = {}) {
-    this.throwOnConflict = options.throwOnConflict || false;
+    this.env = options.env || new Environment();
+    this.ui = options.ui || new UI();
+
     this.rootPath = options.rootPath;
   }
 
@@ -66,7 +75,7 @@ export default class Resolver {
 
     let potentialPaths = this.resolvePaths(entity);
 
-    if (this.throwOnConflict) {
+    if (this.env.isDevelopment) {
       this.detectConflictingFiles(entity, potentialPaths);
     }
 
@@ -76,6 +85,11 @@ export default class Resolver {
       let mod: any;
 
       try {
+        this.ui.veryVerbose({
+          name: "resolver-requiring-path",
+          path: absolutePath
+        });
+
         mod = require(absolutePath);
       } catch (e) {
         continue;
@@ -100,9 +114,18 @@ export default class Resolver {
   resolvePaths(entity: Entity) {
     let type = entity[0];
 
-    return (this.perTypeMappers[type] || this.mappers)
+    let paths = (this.perTypeMappers[type] || this.mappers)
       .map(m => m(entity))
       .filter(p => p);
+
+    this.ui.verbose({
+      name: "resolver-resolve-paths",
+      entityType: entity[0],
+      entityName: entity[1],
+      paths
+    });
+
+    return paths;
   }
 
   detectConflictingFiles([type, name]: Entity, paths: string[]) {

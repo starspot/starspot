@@ -1,3 +1,5 @@
+import Environment from "./environment";
+import UI from "./ui";
 import Resolver from "./resolver";
 
 interface Cache {
@@ -35,10 +37,15 @@ const ALL = Symbol("all");
 export interface ConstructorOptions {
   rootPath?: string;
   resolver?: Resolver;
+  env?: Environment;
+  ui?: UI;
 }
 
 class Container {
   public resolver: Resolver;
+
+  private ui: UI;
+  private env: Environment;
 
   private factoryCache: Cache = { };
   private instanceCache: Cache = { };
@@ -51,6 +58,8 @@ class Container {
   constructor(options: ConstructorOptions = {}) {
     let rootPath = options.rootPath;
     this.resolver = options.resolver || new Resolver({ rootPath });
+    this.ui = options.ui || new UI();
+    this.env = options.env || new Environment();
   }
 
   static metaFor(instance: any): Container.Meta {
