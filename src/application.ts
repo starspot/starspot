@@ -62,41 +62,48 @@ class Application {
       path
     });
 
-    let router = this.container.findInstance("router", Container.MAIN);
-    router.seal();
-    let handlers = router.handlersFor(verb as HTTPVerb, path);
-
-    if (!handlers) {
-      this.routeNotFound(request, response, verb, path);
-      return Promise.resolve(response);
-    }
-
     let result: any;
+    let controllerName: string;
+    let method: string;
 
-    let handler: Handler  = handlers[0].handler;
+    try {
+      let router = this.container.findInstance("router", Container.MAIN);
+      router.seal();
+      let handlers = router.handlersFor(verb as HTTPVerb, path);
 
-    let controllerName = handler.controller;
-    let controller = this.container.findController(controllerName);
-    let method = handler.method;
-
-    ui.info({
-      name: "dispatch-dispatching",
-      controller: controllerName,
-      verb,
-      path,
-      method
-    });
-
-    if (controller && controller[method]) {
-      try {
-        let controllerParams = { response };
-        result = Promise.resolve(controller[method](controllerParams));
-      } catch (e) {
-        result = Promise.reject(e);
+      if (!handlers) {
+        this.routeNotFound(request, response, verb, path);
+        return Promise.resolve(response);
       }
-    } else {
-      this.controllerMethodNotFound(request, response, controllerName, method);
-      return Promise.resolve(response);
+
+      let handler: Handler  = handlers[0].handler;
+
+      controllerName = handler.controller;
+      method = handler.method;
+
+      let controller = this.container.findController(controllerName);
+
+      ui.info({
+        name: "dispatch-dispatching",
+        controller: controllerName,
+        verb,
+        path,
+        method
+      });
+
+      if (controller && controller[method]) {
+        try {
+          let controllerParams = { response };
+          result = Promise.resolve(controller[method](controllerParams));
+        } catch (e) {
+          result = Promise.reject(e);
+        }
+      } else {
+        this.controllerMethodNotFound(request, response, controllerName, method);
+        return Promise.resolve(response);
+      }
+    } catch (e) {
+      return Promise.reject(e);
     }
 
     return result
