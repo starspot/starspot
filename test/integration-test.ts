@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Model, Controller } from "../src";
+import { JSONAPI } from "../src";
 import * as test from "./helpers/application";
 
 describe("Integration: Route Dispatching", function() {
@@ -148,6 +149,34 @@ describe("Integration: Route Dispatching", function() {
       await app.dispatch(request, response);
 
       expect(response.statusCode).to.equal(500);
+    });
+
+    it("passes the JSON body as a parameter", async function() {
+      let wasCalled = false;
+
+      class BodyPhotoController extends Controller {
+        async index({ json }: { json: JSONAPI.Document }) {
+          let data = await json;
+          expect(data).to.deep.equal({ Hello: "world" });
+          wasCalled = true;
+        }
+      }
+
+      let app = await test.createApplication()
+        .routes(({ resources }) => {
+          resources("photos");
+        })
+        .controller("photos", BodyPhotoController)
+        .model("photo", Photo)
+        .boot();
+
+      let request = test.createRequest("/photos");
+      let response = test.createResponse();
+
+      request.body = JSON.stringify({ Hello: "world" });
+
+      await app.dispatch(request, response);
+      expect(wasCalled).to.be.true;
     });
   });
 });

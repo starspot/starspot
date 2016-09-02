@@ -4,6 +4,7 @@ import Serializer from "./json-api/serializer";
 import JSONAPI from "./json-api";
 import Container from "./container";
 import Environment from "./environment";
+import { ControllerParameters } from "./controller";
 import { jsonToHTMLDocument } from "./util/json-to-html";
 
 class Application {
@@ -93,8 +94,8 @@ class Application {
 
       if (controller && controller[method]) {
         try {
-          let controllerParams = { response };
-          result = Promise.resolve(controller[method](controllerParams));
+          let params = new ControllerParameters(request, response);
+          result = Promise.resolve(controller[method](params));
         } catch (e) {
           result = Promise.reject(e);
         }
@@ -201,6 +202,7 @@ namespace Application {
     url: string;
     headers: { [key: string]: string };
     trailers?: any;
+    body?: Buffer | string;
   }
 
   export interface Response {

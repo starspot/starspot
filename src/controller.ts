@@ -1,6 +1,9 @@
+import getRawBody = require("raw-body");
+import { Readable } from "stream";
 import Application from "./application";
 import Container from "./container";
 import Model from "./model";
+import JSONAPI from "./json-api";
 
 interface Controller {
   index?<T>(params: Controller.Parameters): T[] | T | Promise<T[]> | Promise<T> | void;
@@ -19,8 +22,34 @@ class Controller {
 
 namespace Controller {
   export interface Parameters {
+    request: Application.Request;
     response: Application.Response;
+    json: JSONAPI.Document;
   }
 }
 
 export default Controller;
+
+export class ControllerParameters {
+  constructor(public request: Application.Request,
+              public response: Application.Response) {
+  }
+
+  get json(): Promise<JSONAPI.Document> {
+    let request = this.request;
+    let body: Promise<string | Buffer>;
+
+    if (request instanceof Readable) {
+      body = getRawBody(request);
+    } else if (request.body !== undefined) {
+      body = Promise.resolve(request.body);
+    } else {
+      return Promise.resolve(null);
+    }
+
+    return body.then(data => {
+      data = data.toString();
+      return JSON.parse(data);
+    });
+  }
+}

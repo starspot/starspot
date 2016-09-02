@@ -13,6 +13,7 @@ export interface Dict<T> {
 
 export class FakeRequest implements Application.Request {
   public headers: { [key: string]: string };
+  public body: string;
 
   constructor(public url: string, public method: string) {
     this.headers = {
