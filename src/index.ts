@@ -1,5 +1,6 @@
 export { default as Resolver } from "./resolver"
 export { default as Container } from "./container"
+export { default as JSONAPI } from "./json-api"
 export { default as Serializer } from "./json-api/serializer";
 export { default as Model } from "./model";
 export { default as Controller } from "./controller";

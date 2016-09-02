@@ -1,4 +1,4 @@
-import JSONAPI from "./interfaces";
+import JSONAPI from "./index";
 
 interface Attributes {
   [attr: string]: any;

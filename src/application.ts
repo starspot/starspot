@@ -1,7 +1,7 @@
 import UI from "./ui";
 import { Handler, HTTPVerb } from "./router";
 import Serializer from "./json-api/serializer";
-import JSONAPI from "./json-api/interfaces";
+import JSONAPI from "./json-api";
 import Container from "./container";
 import Environment from "./environment";
 import { jsonToHTMLDocument } from "./util/json-to-html";

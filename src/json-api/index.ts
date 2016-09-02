@@ -39,6 +39,7 @@ namespace JSONAPI {
   export type Document = ErrorDocument | DataDocument;
 
   export interface PrimaryData {
+    attributes: {}
   }
 
   export interface LinkObject {
