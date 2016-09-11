@@ -1,0 +1,6 @@
+{
+  "name": "not-an-addon",
+  "version": "1.0.0",
+  "//": "Does not contain starspot-addon as a keyword, so should not be considered an addon",
+  "keywords": ["phuby-on-phails"]
+}

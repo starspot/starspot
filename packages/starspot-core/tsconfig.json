@@ -4,7 +4,6 @@
     "noImplicitAny": true,
 
     // Module configuration
-    "lib": ["es2016"],
     "moduleResolution": "node",
     "target": "es2015",
     "module": "commonjs",
@@ -12,8 +11,8 @@
   },
 
   "include": [
-    "packages/*/src/**/*.ts",
-    "packages/*/typings/**/*.d.ts",
+    "src/index.ts",
+    "src/typings/**/*.d.ts",
     "test/**/*.ts"
   ]
 }

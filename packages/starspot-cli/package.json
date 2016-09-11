@@ -1,0 +1,65 @@
+{
+  "name": "starspot-cli",
+  "version": "0.3.13",
+  "description": "CLI tools for starspot",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "test": "mocha",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublish": "npm test && npm run build",
+    "postversion": "npm publish && git push && git push --tags"
+  },
+  "bin": {
+    "starspot": "./dist/bin/starspot.js"
+  },
+  "files": [
+    "dist",
+    "dns.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starspot/starspot-cli.git"
+  },
+  "author": "Tom Dale <tom@tomdale.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/starspot/starspot-cli/issues"
+  },
+  "homepage": "https://github.com/starspot/starspot-cli#readme",
+  "devDependencies": {
+    "@types/chai": "^3.4.30",
+    "@types/chalk": "^0.4.28",
+    "@types/chokidar": "^1.4.28",
+    "@types/dotenv": "^2.0.17",
+    "@types/inquirer": "0.0.28",
+    "@types/mocha": "^2.2.30",
+    "@types/mz": "0.0.26",
+    "@types/node": "^6.0.33",
+    "@types/request": "0.0.29",
+    "@types/request-promise": "^3.0.29",
+    "@types/resolve": "0.0.2",
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "request": "^2.74.0",
+    "request-promise": "^4.1.1",
+    "ts-node": "^1.2.3",
+    "tslint": "^3.14.0-dev.1",
+    "typescript": "2.1.0-dev.20160810"
+  },
+  "dependencies": {
+    "blueprinter": "^0.1.1",
+    "chalk": "^1.1.3",
+    "chokidar": "^1.6.0",
+    "dotenv": "^2.0.0",
+    "fs-promise": "^0.5.0",
+    "http2": "^3.3.4",
+    "inquirer": "^1.1.2",
+    "mz": "^2.4.0",
+    "native-dns": "^0.7.0",
+    "resolve": "^1.1.7",
+    "route-recognizer": "^0.2.1",
+    "starspot": "^0.3.6",
+    "wordwrap": "^1.0.0"
+  }
+}

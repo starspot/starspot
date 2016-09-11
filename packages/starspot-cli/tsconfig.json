@@ -12,8 +12,8 @@
   },
 
   "include": [
-    "packages/*/src/**/*.ts",
-    "packages/*/typings/**/*.d.ts",
+    "src/**/*.ts",
+    "typings/**/*.d.ts",
     "test/**/*.ts"
   ]
 }
