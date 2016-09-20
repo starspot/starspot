@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import * as chokidar from "chokidar";
 import { readFile } from "mz/fs";
 
-import { Application, Container } from "starspot";
+import { Application, Container } from "starspot-core";
 import Task from "../task";
 // import SSLNotFoundError from "../errors/ssl-not-found-error";
 import { SSL_KEY_PATH, SSL_CERT_PATH, DNS_TLD } from "../config";

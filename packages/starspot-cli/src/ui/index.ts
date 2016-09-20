@@ -1,4 +1,4 @@
-import { UI as BaseUI } from "starspot";
+import { UI as BaseUI } from "starspot-core";
 import { inspect } from "util";
 import * as chalk from "chalk";
 import * as inquirer from "inquirer";

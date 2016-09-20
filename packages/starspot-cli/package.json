@@ -59,7 +59,7 @@
     "native-dns": "^0.7.0",
     "resolve": "^1.1.7",
     "route-recognizer": "^0.2.1",
-    "starspot": "^0.3.6",
+    "starspot-core": "^0.3.6",
     "wordwrap": "^1.0.0"
   }
 }

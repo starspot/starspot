@@ -1,4 +1,4 @@
-import { Environment } from "starspot";
+import { Environment } from "starspot-core";
 import UI from "./ui";
 import Project from "./project";
 import HandledError from "./errors/handled-error";

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { dirname } from "path";
 
-import { Application, Container, Environment } from "starspot";
+import { Application, Container, Environment } from "starspot-core";
 
 import UI from "./ui";
 import Task from "./task";

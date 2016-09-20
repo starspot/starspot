@@ -1,1 +1,1 @@
-export * from "starspot";
+export * from "starspot-core";

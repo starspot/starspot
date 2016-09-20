@@ -1,4 +1,4 @@
-import { Application } from "starspot";
+import { Application } from "starspot-core";
 import { CommandConstructor } from "./command";
 
 export default class Addon {
