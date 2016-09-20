@@ -66,15 +66,15 @@ export interface Factory {
 
 export class ApplicationBuilderDSL {
   constructor(private app: Application,
-              private resolver: Container) { }
+              private container: Container) { }
 
   controller(name: string, klass: typeof Controller & Factory) {
-    this.resolver.registerFactory("controller", name, klass);
+    this.container.registerFactory("controller", name, klass);
     return this;
   }
 
   routes(cb: (dsl: Router.DSL) => void) {
-    this.resolver.registerFactory("router", Container.MAIN, class extends Router {
+    this.container.registerFactory("router", Container.MAIN, class extends Router {
       map(dsl: Router.DSL) {
         cb(dsl);
       }
@@ -84,7 +84,7 @@ export class ApplicationBuilderDSL {
   }
 
   model(name: string, klass: typeof Model & Factory) {
-    this.resolver.registerFactory("model", name, klass);
+    this.container.registerFactory("model", name, klass);
     return this;
   }
 
