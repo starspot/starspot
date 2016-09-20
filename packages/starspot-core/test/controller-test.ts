@@ -1,4 +1,4 @@
-import { ControllerParameters } from "../src/controller";
+import Controller from "../src/controller";
 import { Readable } from "stream";
 import { expect } from "chai";
 
@@ -8,7 +8,7 @@ describe("ControllerParameters", function() {
     let req: any = {};
     let res: any = {};
 
-    let params = new ControllerParameters(req, res);
+    let params = new Controller.Parameters(req, res);
     expect(params.request).to.equal(req);
     expect(params.response).to.equal(res);
   });
@@ -18,7 +18,7 @@ describe("ControllerParameters", function() {
       body: JSON.stringify({ "hello": "world" })
     };
 
-    let params = new ControllerParameters(request, null);
+    let params = new Controller.Parameters(request, null);
     let json = await params.json;
 
     expect(json).to.deep.equal({
@@ -34,7 +34,7 @@ describe("ControllerParameters", function() {
       }
     });
 
-    let params = new ControllerParameters(request, null);
+    let params = new Controller.Parameters(request, null);
     let json = await params.json;
 
     expect(json).to.deep.equal({

@@ -20,36 +20,30 @@ class Controller {
   }
 }
 
-namespace Controller {
-  export interface Parameters {
-    request: Application.Request;
-    response: Application.Response;
-    json: JSONAPI.Document;
-  }
-}
-
 export default Controller;
 
-export class ControllerParameters {
-  constructor(public request: Application.Request,
-              public response: Application.Response) {
-  }
-
-  get json(): Promise<JSONAPI.Document> {
-    let request = this.request;
-    let body: Promise<string | Buffer>;
-
-    if (request instanceof Readable) {
-      body = getRawBody(request);
-    } else if (request.body !== undefined) {
-      body = Promise.resolve(request.body);
-    } else {
-      return Promise.resolve(null);
+namespace Controller {
+  export class Parameters {
+    constructor(public request: Application.Request,
+                public response: Application.Response) {
     }
 
-    return body.then(data => {
-      data = data.toString();
-      return JSON.parse(data);
-    });
+    get json(): Promise<JSONAPI.Document> {
+      let request = this.request;
+      let body: Promise<string | Buffer>;
+
+      if (request instanceof Readable) {
+        body = getRawBody(request);
+      } else if (request.body !== undefined) {
+        body = Promise.resolve(request.body);
+      } else {
+        return Promise.resolve(null);
+      }
+
+      return body.then(data => {
+        data = data.toString();
+        return JSON.parse(data);
+      });
+    }
   }
 }
