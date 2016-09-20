@@ -92,6 +92,11 @@ export default class Resolver {
 
         mod = require(absolutePath);
       } catch (e) {
+        this.ui.veryVerbose({
+          name: "resolver-requiring-error",
+          path: absolutePath,
+          error: e
+        });
         continue;
       }
 
