@@ -155,8 +155,8 @@ describe("Integration: Route Dispatching", function() {
       let wasCalled = false;
 
       class BodyPhotoController extends Controller {
-        async index({ json }: { json: JSONAPI.Document }) {
-          let data = await json;
+        async index(params: Controller.Parameters) {
+          let data = await params.json;
           expect(data).to.deep.equal({ Hello: "world" });
           wasCalled = true;
         }
