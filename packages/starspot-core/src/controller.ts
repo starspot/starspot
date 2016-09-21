@@ -3,7 +3,7 @@ import { Readable } from "stream";
 import Application from "./application";
 import Container from "./container";
 import Model from "./model";
-import JSONAPI from "./json-api";
+import JSONAPI from "starspot-json-api";
 
 interface Controller {
   index?<T>(params: Controller.Parameters): T[] | T | Promise<T[]> | Promise<T> | void;

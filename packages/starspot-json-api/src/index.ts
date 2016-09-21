@@ -1,13 +1,24 @@
+export { default as Serializer } from "./serializer";
+
 namespace JSONAPI {
-  export type ID = string | number;
+  // Every resource object MUST contain an id member and a type member. The
+  // values of the id and type members MUST be strings.
+  // http://jsonapi.org/format/1.1/#document-resource-object-identification
+  export type ID = string;
+  export type Type = string;
+
   export type Value = string | number | boolean | {};
+
+  export interface MetaObject {
+    [key: string]: any;
+  }
 
   export interface DataDocument {
     /** the document’s “primary data” */
     data: PrimaryData;
 
     /** a meta object that contains non-standard meta-information. */
-    meta?: {};
+    meta?: MetaObject;
 
     /** an object describing the server’s implementation */
     jsonapi?: {};
@@ -24,7 +35,7 @@ namespace JSONAPI {
     errors: Error[];
 
     /** a meta object that contains non-standard meta-information. */
-    meta?: {};
+    meta?: MetaObject;
 
     /** an object describing the server’s implementation */
     jsonapi?: {};
@@ -45,6 +56,11 @@ namespace JSONAPI {
     meta: any;
   }
 
+  export interface LinksObject {
+    self?: LinkObject;
+    related?: LinkObject;
+  }
+
   export type Link = LinkObject | string;
 
   export interface LinksAbout {
@@ -55,12 +71,28 @@ namespace JSONAPI {
     [key: string]: Value;
   }
 
+  export interface RelationshipsObject {
+    [key: string]: RelationshipObject;
+  }
+
+  export type RelationshipObject = LinksObject | ResourceLinkage | MetaObject;
+
+  export type ResourceLinkage  = ResourceIdentifierObject | ResourceIdentifierObject[];
+
+  export interface ResourceIdentifierObject {
+    type: Type;
+    id: ID;
+    meta?: MetaObject;
+  }
+
   export interface ResourceObject {
     id: ID;
     type: string;
 
     /** an attributes object representing some of the resource’s data. */
     attributes?: AttributesObject;
+
+    relationships?: RelationshipsObject;
   }
 
   export interface Error {

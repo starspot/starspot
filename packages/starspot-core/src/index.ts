@@ -1,7 +1,6 @@
 export { default as Resolver } from "./resolver"
 export { default as Container } from "./container"
-export { default as JSONAPI } from "./json-api"
-export { default as Serializer } from "./json-api/serializer";
+export { default as JSONAPI, Serializer } from "starspot-json-api";
 export { default as Model } from "./model";
 export { default as Controller } from "./controller";
 export { default as Application } from "./application";

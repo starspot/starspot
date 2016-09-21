@@ -28,7 +28,6 @@
   },
   "homepage": "https://github.com/starspot/starspot-cli#readme",
   "devDependencies": {
-    "@types/chai": "^3.4.30",
     "@types/chalk": "^0.4.28",
     "@types/chokidar": "^1.4.28",
     "@types/dotenv": "^2.0.17",
@@ -39,12 +38,10 @@
     "@types/request": "0.0.29",
     "@types/request-promise": "^3.0.29",
     "@types/resolve": "0.0.2",
-    "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "request": "^2.74.0",
     "request-promise": "^4.1.1",
     "ts-node": "^1.2.3",
-    "tslint": "^3.14.0-dev.1",
     "typescript": "2.1.0-dev.20160810"
   },
   "dependencies": {

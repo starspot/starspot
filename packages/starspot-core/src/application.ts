@@ -1,7 +1,6 @@
 import UI from "./ui";
 import { Handler, HTTPVerb } from "./router";
-import Serializer from "./json-api/serializer";
-import JSONAPI from "./json-api";
+import JSONAPI, { Serializer } from "starspot-json-api";
 import Container from "./container";
 import Environment from "./environment";
 import Controller from "./controller";
