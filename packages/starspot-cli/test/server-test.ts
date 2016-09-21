@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import * as rp from "request-promise";
 
-import { Environment } from "starspot";
+import { Environment } from "starspot-core";
 import Project from "../src/project";
 
 import { StubProject, StubUI } from "./helpers/stubs";

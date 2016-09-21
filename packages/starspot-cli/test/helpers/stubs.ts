@@ -1,4 +1,4 @@
-import { Environment } from "starspot";
+import { Environment } from "starspot-core";
 import Project from "../../src/project";
 import Task from "../../src/task";
 import UI from "../../src/ui";
