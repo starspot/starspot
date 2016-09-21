@@ -119,4 +119,33 @@ describe("Container", function() {
     expect(photosController).to.be.an.instanceof(PhotosController);
   });
 
+  it("injects multiple properties", function() {
+    let container = new Container();
+
+
+    container.registerFactory("controller", "photos", class PhotosController {});
+    container.registerFactory("service", "firstService", class FirstService {});
+    container.registerFactory("service", "secondService", class SecondService {});
+
+    container.inject("controller", {
+      with: ["service", "firstService"],
+      as: "firstService",
+      annotation: "inject-firstService-into-controllers"
+    });
+
+    container.inject("controller", {
+      with: ["service", "secondService"],
+      as: "secondService",
+      annotation: "inject-secondService-into-controllers"
+    });
+
+    let photosController = container.findInstance("controller", "photos");
+    let firstService = container.findInstance("service", "firstService");
+    let secondService = container.findInstance("service", "secondService");
+
+    expect(photosController.firstService).to.equal(firstService);
+    expect(photosController.secondService).to.equal(secondService);
+
+  });
+
 });

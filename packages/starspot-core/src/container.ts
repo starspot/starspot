@@ -198,12 +198,10 @@ class Container {
     return function() {
       let instance = new factory(...arguments);
 
-      for (let i = 0; i < injections.length; i++) {
-        let injection = injections[0];
+      injections.forEach((injection) => {
         let [injectionType, injectionName] = injection.with;
-
         instance[injection.as] = resolver.findInstance(injectionType, injectionName);
-      }
+      });
 
       return instance;
     };
