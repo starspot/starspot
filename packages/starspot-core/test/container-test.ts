@@ -122,7 +122,6 @@ describe("Container", function() {
   it("injects multiple properties", function() {
     let container = new Container();
 
-
     container.registerFactory("controller", "photos", class PhotosController {});
     container.registerFactory("service", "firstService", class FirstService {});
     container.registerFactory("service", "secondService", class SecondService {});
@@ -145,7 +144,5 @@ describe("Container", function() {
 
     expect(photosController.firstService).to.equal(firstService);
     expect(photosController.secondService).to.equal(secondService);
-
   });
-
 });
