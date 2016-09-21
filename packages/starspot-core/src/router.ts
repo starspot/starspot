@@ -104,7 +104,7 @@ namespace Router {
       // PATCH /photos/1234 -> PhotosController.update()
       router.addRoute("PATCH", memberPath, controller, "update");
       // DELETE /photos/1234 -> PhotosController.destroy()
-      router.addRoute("PATCH", memberPath, controller, "destroy");
+      router.addRoute("DELETE", memberPath, controller, "destroy");
     }
 
     get = (path: string, { controller, method }: RouteOptions): void => {
