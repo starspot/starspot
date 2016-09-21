@@ -92,12 +92,15 @@ export default class Resolver {
 
         mod = require(absolutePath);
       } catch (e) {
+        if (e.code === "MODULE_NOT_FOUND") { continue; }
+
         this.ui.veryVerbose({
           name: "resolver-requiring-error",
           path: absolutePath,
           error: e
         });
-        continue;
+
+        throw e;
       }
 
       // For error messages and autoreloading, we need to know the full,
