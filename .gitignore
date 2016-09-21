@@ -1,4 +1,5 @@
 .DS_Store
 node_modules
-dist
+./dist
+packages/*/dist
 lerna-debug.log
