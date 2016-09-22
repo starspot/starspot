@@ -14,7 +14,7 @@ interface Controller {
 }
 
 class Controller {
-  createModel(modelName: string): Model {
+  createModel<T extends Model>(modelName: string): T {
     let container = Container.metaFor(this).container;
     return container.findInstance("model", modelName);
   }
