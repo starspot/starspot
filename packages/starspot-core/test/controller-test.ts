@@ -19,7 +19,7 @@ describe("ControllerParameters", function() {
     };
 
     let params = new Controller.Parameters(request, null);
-    let json = await params.json;
+    let json = await params.json();
 
     expect(json).to.deep.equal({
       hello: "world"
@@ -35,7 +35,7 @@ describe("ControllerParameters", function() {
     });
 
     let params = new Controller.Parameters(request, null);
-    let json = await params.json;
+    let json = await params.json();
 
     expect(json).to.deep.equal({
       hello: "world"

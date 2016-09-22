@@ -28,7 +28,7 @@ namespace Controller {
                 public response: Application.Response) {
     }
 
-    get json(): Promise<JSONAPI.Document> {
+    json(): Promise<JSONAPI.Document> {
       let request = this.request;
       let body: Promise<string | Buffer>;
 
