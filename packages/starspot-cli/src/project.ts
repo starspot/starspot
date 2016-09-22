@@ -114,7 +114,7 @@ export default class Project {
       // The build pipeline strips out `package.json` files in production, so just assume all directories in the addon
       // directory are proper addons. Presumably your dev environment would've been broken if they weren't /shrug
       // TODO: remove once https://github.com/starspot/starspot/issues/7 is resolved
-      filteredAddons = filteredAddons.map(([addonPath, pkg]: AddonPkg): AddonPkg => [addonPath, {name: addonPath}]);
+      filteredAddons = filteredAddons.map(([addonPath]: AddonPkg): AddonPkg => [addonPath, {name: addonPath}]);
     } else {
       filteredAddons = filteredAddons.filter(addon => isAddonPkg(addon, ui));
     }
