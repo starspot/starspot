@@ -35,13 +35,13 @@ describe("Integration: Route Dispatching", function() {
     class PhotoController extends Controller {
       index() {
         let photo1 = new Photo({
-          id: 1234,
+          id: "1234",
           firstName: "Tom",
           lastName: "Dale"
         });
 
         let photo2 = new Photo({
-          id: 4567,
+          id: "4567",
           firstName: "Zahra",
           lastName: "Jabini"
         });
@@ -74,14 +74,14 @@ describe("Integration: Route Dispatching", function() {
       expect(response.toJSON()).to.deep.equal({
         data: [{
           type: "photo",
-          id: 1234,
+          id: "1234",
           attributes: {
             firstName: "Tom",
             lastName: "Dale"
           }
         }, {
           type: "photo",
-          id: 4567,
+          id: "4567",
           attributes: {
             firstName: "Zahra",
             lastName: "Jabini"
@@ -95,7 +95,7 @@ describe("Integration: Route Dispatching", function() {
         index() {
           return new Promise(resolve => {
             let photo = this.createModel("photo") as Photo;
-            photo.id = 1234;
+            photo.id = "1234";
             photo.firstName = "Tom";
             photo.lastName = "Dale";
 
@@ -120,7 +120,7 @@ describe("Integration: Route Dispatching", function() {
       expect(response.toJSON()).to.deep.equal({
         data: {
           type: "photo",
-          id: 1234,
+          id: "1234",
           attributes: {
             firstName: "Tom",
             lastName: "Dale"
