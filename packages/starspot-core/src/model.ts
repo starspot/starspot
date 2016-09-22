@@ -29,7 +29,7 @@ class Serializer implements JSONAPISerializer.Protocol<Model> {
 
 const serializer = new Serializer();
 
-export default class Model implements JSONAPISerializer.Serializable {
+class Model implements JSONAPISerializer.Serializable {
   [attribute: string]: any;
 
   static attributes: string[] = [];
@@ -43,4 +43,14 @@ export default class Model implements JSONAPISerializer.Serializable {
       Object.assign(this, attributes);
     }
   }
+
+  validate(): boolean {
+    return true;
+  }
+
+  save(): Promise<this> {
+    return Promise.resolve(this);
+  }
 }
+
+export default Model;
