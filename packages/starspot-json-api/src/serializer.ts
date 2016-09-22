@@ -39,7 +39,7 @@ function serializeModel(model: Serializer.Serializable): JSONAPI.ResourceObject 
 }
 
 function protocolFor(obj: any) {
-  return obj["@@SerializerProtocol"];
+  return obj && obj["@@SerializerProtocol"];
 }
 
 namespace Serializer {
