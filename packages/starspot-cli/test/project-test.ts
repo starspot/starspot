@@ -101,32 +101,56 @@ describe("Project", function() {
     expect(commands.length).to.equal(2);
   });
 
-  it("discovers installed in-app addons", function() {
+  describe("in-app addons", function () {
     let ui = new StubUI();
-    ui.expect(["addon-no-package-json", "addon-malformed-package-json", "addon-not-really-an-addon"]);
 
-    let project = new Project({
-      ui: ui,
-      cwd: fixture("in-app-addons-project")
+    it("discovers installed in-app addons", function() {
+      ui.expect(["addon-no-package-json", "addon-malformed-package-json", "addon-not-really-an-addon"]);
+
+      let project = new Project({
+        ui: ui,
+        cwd: fixture("in-app-addons-project")
+      });
+
+      expect(project.addons.map(a => a.name)).to.include.members(["addon-a", "addon-b"]);
+      expect(project.addons.map(a => a.name)).to.not.include.members(["empty-directory", "malformed-package-json", "not-an-addon"]);
+
+      expect(ui.loggedEvents).to.deep.include({
+        name: "addon-no-package-json",
+        category: "warn",
+        addon: "empty-directory"
+      });
+
+      expect(ui.loggedEvents).to.deep.include({
+        name: "addon-malformed-package-json",
+        category: "warn",
+        addon: "malformed-package-json"
+      });
+
+      expect(ui.loggedEvents).to.deep.include({
+        name: "addon-not-really-an-addon",
+        category: "warn",
+        addon: "not-an-addon"
+      });
     });
 
-    expect(project.addons.map(a => a.name)).to.include.members(["addon-a", "addon-b"]);
-    expect(ui.loggedEvents).to.deep.include({
-      name: "addon-no-package-json",
-      category: "warn",
-      addon: "empty-directory"
-    });
+    it("discovers addons without `package.json` in production", function() {
+      ui.expect(["addon-no-package-json"]);
 
-    expect(ui.loggedEvents).to.deep.include({
-      name: "addon-malformed-package-json",
-      category: "warn",
-      addon: "malformed-package-json"
-    });
+      let oldEnv = process.env.NODE_ENV;
 
-    expect(ui.loggedEvents).to.deep.include({
-      name: "addon-not-really-an-addon",
-      category: "warn",
-      addon: "not-an-addon"
+      try {
+        process.env.NODE_ENV = "production";
+
+        let project = new Project({
+          ui: ui,
+          cwd: fixture("in-app-addons-project-production")
+        });
+
+        expect(project.addons.map(a => a.name)).to.include.members(["addon-a", "addon-b"]);
+      } finally {
+        process.env.NODE_ENV = oldEnv;
+      }
     });
   });
 

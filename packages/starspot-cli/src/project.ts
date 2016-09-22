@@ -19,7 +19,7 @@ export interface ConstructorOptions {
   env?: Environment;
 }
 
-type AddonPkg = [string, any];
+type AddonPkg = [string, {name: string, keywords?: string}];
 
 export default class Project {
   cwd: string;
@@ -91,6 +91,7 @@ export default class Project {
     let ui = this.ui;
     let addonsPath = this.addonsPath;
     let potentialAddons: string[];
+    let filteredAddons: AddonPkg[];
 
     try {
       potentialAddons = readdirSync(addonsPath);
@@ -106,10 +107,19 @@ export default class Project {
     // file. We filter out any directories that don't have a package.json or
     // don't include "starspot-addon" in their keywords, but emit a warning that
     // they are not being used.
-    return potentialAddons
-      .map(addonPath => readAddonPkg(addonsPath, addonPath, ui))
-      .filter(addon => isAddonPkg(addon, ui))
-      .map(addon => loadAddon(addonsPath, addon));
+    filteredAddons = potentialAddons
+      .map(addonPath => readAddonPkg(addonsPath, addonPath, ui));
+
+    if (this.env.isProduction) {
+      // The build pipeline strips out `package.json` files in production, so just assume all directories in the addon
+      // directory are proper addons. Presumably your dev environment would've been broken if they weren't /shrug
+      // TODO: remove once https://github.com/starspot/starspot/issues/7 is resolved
+      filteredAddons = filteredAddons.map(([addonPath, pkg]: AddonPkg): AddonPkg => [addonPath, {name: addonPath}]);
+    } else {
+      filteredAddons = filteredAddons.filter(addon => isAddonPkg(addon, ui));
+    }
+
+    return filteredAddons.map(addon => loadAddon(addonsPath, addon));
   }
 
   get isTypeScript(): boolean {
@@ -229,7 +239,7 @@ function isAddonPkg([addonPath, pkg]: AddonPkg,  ui: UI): boolean {
    return false;
 }
 
-function loadAddon(addonsPath: string, [addonPath, pkg]: AddonPkg) {
+function loadAddon(addonsPath: string, [addonPath, pkg]: AddonPkg): Addon {
   let AddonClass = require(`${addonsPath}/${addonPath}`).default;
 
   if (!AddonClass || !(AddonClass.prototype instanceof Addon)) {
