@@ -105,6 +105,13 @@ namespace Router {
       router.addRoute("PATCH", memberPath, controller, "update");
       // DELETE /photos/1234 -> PhotosController.destroy()
       router.addRoute("DELETE", memberPath, controller, "destroy");
+
+      // TODO: add proper CORS support!
+      // https://github.com/starspot/starspot/issues/10
+      // OPTIONS /photos/1234 -> PhotosController.cors()
+      router.addRoute("OPTIONS", path, controller, "cors");
+      // OPTIONS /photos/1234 -> PhotosController.cors()
+      router.addRoute("OPTIONS", memberPath, controller, "cors");
     }
 
     get = (path: string, { controller, method }: RouteOptions): void => {
