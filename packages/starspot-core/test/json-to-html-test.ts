@@ -100,4 +100,14 @@ describe("JSON to HTML serialization", function() {
 <span class="control tab">  </span><span class="control bracket curly closing">}</span></span></span>
 <span class="control tab"></span><span class="control bracket curly closing">}</span></span>`);
   });
+
+  it("serializes undefined", function() {
+    let json = {
+      hello: undefined as any
+    };
+
+    expect(jsonToHTML(json)).to.equal(`<span class="dictionary"><span class="control bracket curly opening">{</span>
+<span class="control tab">  </span><span class="key-hello"><span class="string key"><span class="control quote opening">"</span><span class="text">hello</span><span class="control quote closing">"</span></span><span class="control colon">:</span> <span class="undefined">undefined</span></span>
+<span class="control tab"></span><span class="control bracket curly closing">}</span></span>`);
+  });
 });

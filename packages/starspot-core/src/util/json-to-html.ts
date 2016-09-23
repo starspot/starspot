@@ -127,6 +127,8 @@ class JSONHTMLSerializer {
         if (Array.isArray(json)) { return this.array(json); }
 
         return this.hash(json);
+      case "undefined":
+        return this.span(json, "undefined");
       default:
         throw new Error("Unsupported data type: " + String(json));
     }
