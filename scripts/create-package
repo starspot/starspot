@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+
+let packageName = process.argv[2];
+let shared = __dirname + "/../shared/";
+
+if (!packageName) {
+  console.log("Please provide a package name");
+}
+
+let target = "packages/" + packageName + "/";
+
+fs.mkdirSync(target);
+
+link(".vscode");
+link("tsconfig.json");
+link("tsconfig.build.json");
+link("tslint.json");
+link("_package_.json", "package.json");
+
+function link(sharedName, targetName) {
+  if (!targetName) targetName = sharedName;
+
+  fs.symlinkSync(shared + sharedName, target + targetName);
+}

@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { Model } from "../src";
-import { Serializer } from "starspot-json-api";
+import Model from "../src/model";
+import Serializer from "../src/serializer";
 
   describe("JSON API serialization", function() {
     class Photo extends Model {

@@ -29,6 +29,9 @@
     "url": "https://github.com/starspot/starspot/issues"
   },
   "homepage": "https://github.com/starspot/starspot#readme",
+  "dependencies": {
+    "starspot-core": "^0.4.4"
+  },
   "devDependencies": {
     "@types/chai": "^3.4.33",
     "@types/mocha": "^2.2.32",

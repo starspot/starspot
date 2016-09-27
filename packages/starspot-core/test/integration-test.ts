@@ -1,13 +1,12 @@
 import { expect } from "chai";
-import { Model, Controller } from "../src";
-import { JSONAPI } from "../src";
+import { Controller } from "../src";
 import * as test from "./helpers/application";
 
-describe("Integration: Route Dispatching", function() {
+describe("Integration: Route Dispatching", function () {
 
-  describe("responses", function() {
+  describe("responses", function () {
 
-    it("passes the response to the controller", async function() {
+    it("passes the response to the controller", async function () {
       let request = test.createRequest("/photos");
       let response = test.createResponse();
       let wasDispatched = false;
@@ -31,39 +30,28 @@ describe("Integration: Route Dispatching", function() {
     });
   });
 
-  describe("resources", function() {
+  describe("resources", function () {
     class PhotoController extends Controller {
       index() {
-        let photo1 = new Photo({
+        return [{
           id: "1234",
           firstName: "Tom",
           lastName: "Dale"
-        });
-
-        let photo2 = new Photo({
+        }, {
           id: "4567",
           firstName: "Zahra",
           lastName: "Jabini"
-        });
-
-        return [photo1, photo2];
+        }];
       }
     }
 
-    class Photo extends Model {
-      static attributes = ["firstName", "lastName"];
-      firstName: string;
-      lastName: string;
-    };
-
-    it("routes GET /<resource> to controller's index() method", async function() {
+    it("routes GET /<resource> to controller's index() method", async function () {
 
       let app = await test.createApplication()
         .routes(({ resources }) => {
           resources("photos");
         })
         .controller("photos", PhotoController)
-        .model("photo", Photo)
         .boot();
 
       let request = test.createRequest("/photos");
@@ -71,35 +59,32 @@ describe("Integration: Route Dispatching", function() {
 
       await app.dispatch(request, response);
 
-      expect(response.toJSON()).to.deep.equal({
-        data: [{
-          type: "photo",
-          id: "1234",
-          attributes: {
-            firstName: "Tom",
-            lastName: "Dale"
-          }
-        }, {
-          type: "photo",
-          id: "4567",
-          attributes: {
-            firstName: "Zahra",
-            lastName: "Jabini"
-          }
-        }]
-      });
+      expect(response.toJSON()).to.deep.equal([{
+        id: "1234",
+        firstName: "Tom",
+        lastName: "Dale"
+      }, {
+        id: "4567",
+        firstName: "Zahra",
+        lastName: "Jabini"
+      }]);
     });
 
-    it("allows controller to return a promise", async function() {
+    it("allows controller to return a promise", async function () {
       class PromisePhotoController extends Controller {
         index() {
           return new Promise(resolve => {
-            let photo = this.createModel("photo") as Photo;
-            photo.id = "1234";
-            photo.firstName = "Tom";
-            photo.lastName = "Dale";
-
-            setImmediate(() => resolve(photo));
+            setImmediate(() => {
+              resolve([{
+                id: "1234",
+                firstName: "Tom",
+                lastName: "Dale"
+              }, {
+                id: "4567",
+                firstName: "Zahra",
+                lastName: "Jabini"
+              }]);
+            });
           });
         }
       }
@@ -109,7 +94,6 @@ describe("Integration: Route Dispatching", function() {
           resources("photos");
         })
         .controller("photos", PromisePhotoController)
-        .model("photo", Photo)
         .boot();
 
       let request = test.createRequest("/photos");
@@ -117,66 +101,64 @@ describe("Integration: Route Dispatching", function() {
 
       await app.dispatch(request, response);
 
-      expect(response.toJSON()).to.deep.equal({
-        data: {
-          type: "photo",
-          id: "1234",
-          attributes: {
-            firstName: "Tom",
-            lastName: "Dale"
-          }
-        }
-      });
+      expect(response.toJSON()).to.deep.equal([{
+        id: "1234",
+        firstName: "Tom",
+        lastName: "Dale"
+      }, {
+        id: "4567",
+        firstName: "Zahra",
+        lastName: "Jabini"
+      }]);
     });
+  });
 
-    it("reports 500 if error during dispatching", async function() {
-      class ErrorPhotoController extends Controller {
-        index() {
-          throw new Error();
-        }
+  it("reports 500 if error during dispatching", async function () {
+    class ErrorPhotoController extends Controller {
+      index() {
+        throw new Error();
       }
+    }
 
-      let app = await test.createApplication()
-        .routes(({ resources }) => {
-          resources("photos");
-        })
-        .controller("photos", ErrorPhotoController)
-        .boot();
+    let app = await test.createApplication()
+      .routes(({ resources }) => {
+        resources("photos");
+      })
+      .controller("photos", ErrorPhotoController)
+      .boot();
 
-      let request = test.createRequest("/photos");
-      let response = test.createResponse();
+    let request = test.createRequest("/photos");
+    let response = test.createResponse();
 
-      await app.dispatch(request, response);
+    await app.dispatch(request, response);
 
-      expect(response.statusCode).to.equal(500);
-    });
+    expect(response.statusCode).to.equal(500);
+  });
 
-    it("passes the JSON body as a parameter", async function() {
-      let wasCalled = false;
+  it("passes the JSON body as a parameter", async function () {
+    let wasCalled = false;
 
-      class BodyPhotoController extends Controller {
-        async index(params: Controller.Parameters) {
-          let data = await params.json();
-          expect(data).to.deep.equal({ Hello: "world" });
-          wasCalled = true;
-        }
+    class BodyPhotoController extends Controller {
+      async index(params: Controller.Parameters) {
+        let data = await params.json();
+        expect(data).to.deep.equal({ Hello: "world" });
+        wasCalled = true;
       }
+    }
 
-      let app = await test.createApplication()
-        .routes(({ resources }) => {
-          resources("photos");
-        })
-        .controller("photos", BodyPhotoController)
-        .model("photo", Photo)
-        .boot();
+    let app = await test.createApplication()
+      .routes(({ resources }) => {
+        resources("photos");
+      })
+      .controller("photos", BodyPhotoController)
+      .boot();
 
-      let request = test.createRequest("/photos");
-      let response = test.createResponse();
+    let request = test.createRequest("/photos");
+    let response = test.createResponse();
 
-      request.body = JSON.stringify({ Hello: "world" });
+    request.body = JSON.stringify({ Hello: "world" });
 
-      await app.dispatch(request, response);
-      expect(wasCalled).to.be.true;
-    });
+    await app.dispatch(request, response);
+    expect(wasCalled).to.be.true;
   });
 });

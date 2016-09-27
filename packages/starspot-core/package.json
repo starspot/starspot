@@ -41,7 +41,6 @@
     "inflected": "^1.1.7",
     "mz": "^2.4.0",
     "raw-body": "^2.1.7",
-    "route-recognizer": "^0.2.1",
-    "starspot-json-api": "^0.4.3"
+    "route-recognizer": "^0.2.1"
   }
 }

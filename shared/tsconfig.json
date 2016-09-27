@@ -2,22 +2,17 @@
   "compilerOptions": {
     // Enhance strictness
     "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
 
     // Module configuration
     "moduleResolution": "node",
     "target": "es2015",
     "module": "commonjs",
-    "inlineSourceMap": true,
-    "declaration": true,
-
-    // Input/output paths
-    "rootDir": "src",
-    "outDir": "dist"
+    "declaration": true
   },
 
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/typings/**/*.d.ts",
+    "test/**/*.ts"
   ]
 }
