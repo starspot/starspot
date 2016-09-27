@@ -2,8 +2,6 @@ import getRawBody = require("raw-body");
 import { Readable } from "stream";
 import Application from "./application";
 import Container from "./container";
-import Model from "./model";
-import JSONAPI from "starspot-json-api";
 
 interface Controller {
   index?<T>(params: Controller.Parameters): T[] | T | Promise<T[]> | Promise<T> | void;
@@ -14,7 +12,7 @@ interface Controller {
 }
 
 class Controller {
-  createModel<T extends Model>(modelName: string): T {
+  createModel<T>(modelName: string): T {
     let container = Container.metaFor(this).container;
     return container.findInstance("model", modelName);
   }
@@ -28,7 +26,7 @@ namespace Controller {
                 public response: Application.Response) {
     }
 
-    json(): Promise<JSONAPI.Document> {
+    json(): Promise<any> {
       let request = this.request;
       let body: Promise<string | Buffer>;
 

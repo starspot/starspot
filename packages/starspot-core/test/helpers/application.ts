@@ -3,7 +3,6 @@ import {
   Router,
   Container,
   Controller,
-  Model,
   UI
 } from "../../src";
 
@@ -30,6 +29,10 @@ export class FakeResponse implements Application.Response {
 
   setHeader(header: string, content: string) {
     this._headers[header] = content;
+  }
+
+  getHeader(header: string) {
+    return this._headers[header];
   }
 
   write(buffer: string | Buffer) {
@@ -80,11 +83,6 @@ export class ApplicationBuilderDSL {
       }
     });
 
-    return this;
-  }
-
-  model(name: string, klass: typeof Model & Factory) {
-    this.container.registerFactory("model", name, klass);
     return this;
   }
 

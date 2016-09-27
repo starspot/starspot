@@ -1,5 +1,5 @@
-import { Serializer as JSONAPISerializer } from "starspot-json-api";
-import Container from "./container";
+import JSONAPISerializer from "./serializer";
+import { Container } from "starspot-core";
 
 export type ID = JSONAPISerializer.ID;
 

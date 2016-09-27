@@ -1,6 +1,5 @@
 import UI from "./ui";
 import { Handler, HTTPVerb } from "./router";
-import JSONAPI, { Serializer } from "starspot-json-api";
 import Container from "./container";
 import Environment from "./environment";
 import Controller from "./controller";
@@ -14,7 +13,6 @@ class Application {
   protected env: Environment;
 
   private _rootPath: string;
-  private _serializer: Serializer;
 
   constructor(options: Application.ConstructorOptions = {}) {
     this.ui = options.ui || new UI();
@@ -22,7 +20,6 @@ class Application {
     this.initializers = options.initializers || [];
 
     this._rootPath = options.rootPath;
-    this._serializer = new Serializer();
 
     this.container = options.container || new Container({
       rootPath: this._rootPath
@@ -107,23 +104,15 @@ class Application {
     }
 
     return result
-      .then((model: Serializer.Serializable) => {
-        let json: JSONAPI.Document;
-        let serializer = this._serializer;
-
-        if (Array.isArray(model)) {
-          if (model[0] && serializer.canSerialize(model[0])) {
-            json = serializer.serializeMany(model);
-          }
-        } else if (serializer.canSerialize(model)) {
-          json = serializer.serialize(model);
-        }
-
+      .then((json: any) => {
         if (expectsHTMLResponse(request)) {
-          this.sendJSONAsHTML(json || model, response);
+          this.sendJSONAsHTML(json, response);
         } else {
-          response.setHeader("Content-Type", "application/json");
-          response.write(JSON.stringify(json || model));
+          if (!response.getHeader("content-type")) {
+            response.setHeader("Content-Type", "application/json");
+          }
+
+          response.write(JSON.stringify(json));
         }
 
         response.end();
@@ -207,6 +196,7 @@ namespace Application {
   export interface Response {
     statusCode: number;
     setHeader(header: string, value: string): void;
+    getHeader(header: string): string;
     write(chunk: Buffer | string, cb?: Function): boolean;
     end(chunk?: Buffer | string): void;
   }
