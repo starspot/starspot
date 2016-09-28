@@ -8,8 +8,8 @@ import { jsonToHTMLDocument } from "./util/json-to-html";
 
 class Application {
   public container: Container;
+  public ui: UI;
 
-  protected ui: UI;
   protected initializers: Application.Initializer[];
   protected env: Environment;
 
