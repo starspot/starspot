@@ -38,8 +38,8 @@ export default <Formatters>{
       return `${verb} ${path} → ${invocation}`;
     },
 
-    "dispatch-complete"({ verb, path, time }) {
-      return `${verb} ${path} ← ${blue(formatHRTime(time))}`;
+    "dispatch-complete"({ verb, path, time, status }) {
+      return `${verb} ${path} ${status} ← ${blue(formatHRTime(time))}`;
     }
   },
 

@@ -131,6 +131,7 @@ class Application {
           verb,
           path,
           method,
+          status: response.statusCode,
           time: process.hrtime(startTime)
         });
 
