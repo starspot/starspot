@@ -29,6 +29,7 @@
     "@types/mocha": "^2.2.29",
     "@types/mz": "0.0.26",
     "@types/node": "^6.0.37",
+    "@types/route-recognizer": "0.0.27",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "ts-node": "^1.2.3",

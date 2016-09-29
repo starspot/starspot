@@ -1,18 +1,22 @@
-import * as RouteRecognizer from "route-recognizer";
-
-export type RecognizeResults = RouteRecognizer.RecognizeResults;
+import RouteRecognizer = require("route-recognizer");
 
 export interface Handler {
   controller: string;
   method: string;
 }
 
-interface Route extends RouteRecognizer.Route {
+interface Route {
+  name?: string;
+  path: string;
+  handler: Handler;
+}
+
+export interface RecognizeResult {
   handler: Handler;
 }
 
 interface Recognizers {
-  [key: string]: RouteRecognizer;
+  [key: string]: RouteRecognizer<Handler>;
 }
 
 export type HTTPVerb = "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -37,7 +41,7 @@ abstract class Router {
   private recognizerFor(verb: HTTPVerb, create?: boolean) {
     let recognizer = this.recognizers[verb];
     if (!recognizer && create) {
-      recognizer = this.recognizers[verb] = new RouteRecognizer();
+      recognizer = this.recognizers[verb] = new RouteRecognizer<Handler>();
     }
 
     return recognizer;
@@ -52,7 +56,7 @@ abstract class Router {
     recognizer.add([route]);
   }
 
-  handlersFor(verb: HTTPVerb, path: string): RecognizeResults[] {
+  handlersFor(verb: HTTPVerb, path: string): RecognizeResult[] {
     let recognizer = this.recognizerFor(verb);
 
     if (recognizer) {
