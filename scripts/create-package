@@ -17,10 +17,16 @@ link(".vscode");
 link("tsconfig.json");
 link("tsconfig.build.json");
 link("tslint.json");
-link("_package_.json", "package.json");
+copy("_package_.json", "package.json");
 
 function link(sharedName, targetName) {
   if (!targetName) targetName = sharedName;
 
   fs.symlinkSync(shared + sharedName, target + targetName);
+}
+
+function copy(sharedName, targetName) {
+  if (!targetName) targetName = sharedName;
+
+  fs.copySync(shared + sharedName, target + targetName);
 }

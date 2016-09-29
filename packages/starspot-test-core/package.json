@@ -1,1 +1,37 @@
-/Users/monegraph/Code/starspot/scripts/../shared/_package.json
+{
+  "name": "starspot-test-core",
+  "version": "0.4.3",
+  "description": "DSL and utilities for programmatically defining and testing a Starspot application.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "tsc -p tsconfig.build.json",
+    "prepublish": "npm test && npm run build"
+  },
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/starspot/starspot.git"
+  },
+  "keywords": [
+    "starspot"
+  ],
+  "author": "Tom Dale <tom@tomdale.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/starspot/starspot/issues"
+  },
+  "homepage": "https://github.com/starspot/starspot#readme",
+  "dependencies": {
+    "starspot-core": "^0.4.4"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "tslint": "^3.15.1",
+    "typescript": "^2.1.0-dev.20160921"
+  }
+}
