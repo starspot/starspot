@@ -41,6 +41,14 @@
       "port": 5858,
       "sourceMaps": false,
       "outDir": null
+    },
+    {
+      "name": "Debug Create Package Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/scripts/create-package",
+      "args": ["starspot-test-core"],
+      "cwd": "${workspaceRoot}"
     }
   ]
 }
