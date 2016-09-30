@@ -1,32 +1,57 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const path = require("path");
 
 let packageName = process.argv[2];
 let shared = __dirname + "/../shared/";
 
 if (!packageName) {
   console.log("Please provide a package name");
+  process.exit(1);
 }
 
 let target = "packages/" + packageName + "/";
 
 fs.mkdirSync(target);
 
-link(".vscode");
+copy("_package_.json", "package.json");
+rewriteJSON("package.json", pkg => {
+  pkg.name = packageName;
+});
+
+mkdir("src");
 link("tsconfig.json");
 link("tsconfig.build.json");
 link("tslint.json");
-copy("_package_.json", "package.json");
+link(".vscode");
+
+mkdir("test");
+copy("mocha.opts", "test/mocha.opts");
+touch("test/" + packageName + "-test.ts");
+
+function rewriteJSON(jsonPath, cb) {
+  let json = JSON.parse(fs.readFileSync(target + jsonPath));
+  cb(json);
+  fs.writeFileSync(target + jsonPath, JSON.stringify(json, null, 2));
+}
+
+function touch(targetName) {
+  fs.writeFileSync(target + targetName, "");
+}
+
+function mkdir(dirName) {
+  fs.mkdirSync(target + dirName);
+}
 
 function link(sharedName, targetName) {
   if (!targetName) targetName = sharedName;
 
-  fs.symlinkSync(shared + sharedName, target + targetName);
+  fs.symlinkSync(path.relative(target, shared + sharedName), target + targetName);
 }
 
 function copy(sharedName, targetName) {
   if (!targetName) targetName = sharedName;
 
-  fs.copySync(shared + sharedName, target + targetName);
+  fs.writeFileSync(target + targetName, fs.readFileSync(shared + sharedName));
 }
