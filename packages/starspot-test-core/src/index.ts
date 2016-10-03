@@ -10,7 +10,7 @@ export interface Dict<T> {
   [key: string]: T;
 }
 
-export class FakeRequest implements Application.Request {
+export class Request implements Application.Request {
   public headers: { [key: string]: string };
   public body: string;
 
@@ -21,7 +21,7 @@ export class FakeRequest implements Application.Request {
   }
 }
 
-export class FakeResponse implements Application.Response {
+export class Response implements Application.Response {
   statusCode = 200;
   writeBuffer = "";
 
@@ -47,12 +47,12 @@ export class FakeResponse implements Application.Response {
   }
 }
 
-export function createRequest(url: string, method: string = "GET"): FakeRequest {
-  return new FakeRequest(url, method);
+export function createRequest(url: string, method: string = "GET"): Request {
+  return new Request(url, method);
 }
 
-export function createResponse(): FakeResponse {
-  return new FakeResponse();
+export function createResponse(): Response {
+  return new Response();
 }
 
 export function createApplication(routes?: Function) {

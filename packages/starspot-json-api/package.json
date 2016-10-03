@@ -37,6 +37,7 @@
     "@types/mocha": "^2.2.32",
     "mocha": "^3.0.2",
     "tslint": "^3.15.1",
-    "typescript": "^2.1.0-dev.20160921"
+    "typescript": "^2.1.0-dev.20160921",
+    "starspot-test-core": "^0.4.4"
   }
 }
