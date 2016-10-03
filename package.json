@@ -5,7 +5,8 @@
   "repository": "https://github.com/starspot/starspot",
   "license": "MIT",
   "scripts": {
-    "test": "lerna test"
+    "test": "lerna run test",
+    "postinstall": "lerna bootstrap"
   },
   "devDependencies": {
     "@types/chai": "^3.4.33",
