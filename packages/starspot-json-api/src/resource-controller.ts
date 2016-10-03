@@ -1,41 +1,25 @@
-import { Controller } from "starspot-core";
+import { Controller, Container } from "starspot-core";
+import RequestParser from "./request-parser";
+import JSONAPI from "./index";
 
 export default class ResourceController extends Controller {
-  async create(params: Controller.Parameters) {
+  async index(params: Controller.Parameters) {
     return this.processRequest(params);
   }
 
-  private async processRequest(_params: Controller.Parameters) {
-    // if (params.request.headers["content-type"] !== JSONAPI.CONTENT_TYPE) {
-    //   throw new Error("JSON API requests must have a content type of application/vnd.api+json");
-    // }
+  private async processRequest(params: Controller.Parameters) {
+    let response = params.response;
+    response.setHeader("Content-Type", JSONAPI.CONTENT_TYPE);
 
-    // let json = await params.json();
+    let requestParser = new RequestParser(params, Container.containerFor(this));
 
-    // if (isDataDocument(json)) {
-    //   let data = json.data as JSONAPI.ResourceObject;
-    //   let type = data.type;
-    //   let model = this.createModel(type);
-
-    //   Object.keys(data.attributes).forEach(key => {
-    //     model[key] = data.attributes[key];
-    //   });
-
-    //   if (!model.validate()) {
-    //     params.response.statusCode = 422;
-    //     return;
-    //   }
-
-    //   await model.save();
-    //   await this.afterCreate(model);
-
-    //   return model;
-    // } else {
-    //   throw new Error("Not a valid JSON API document");
-    // }
+    try {
+      let operations = await requestParser.parse();
+      return operations.map(op => op.process())[0];
+    } catch (e) {
+      console.log("ERROR");
+      console.log(e);
+      throw e;
+    }
   }
 }
-
-// function isDataDocument(json: JSONAPI.Document): json is JSONAPI.DataDocument {
-//   return (json as JSONAPI.DataDocument).data !== undefined;
-// }

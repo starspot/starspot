@@ -66,6 +66,12 @@ class Container {
     return instance[Container.META];
   }
 
+  static containerFor(instance: any): Container {
+    let meta = Container.metaFor(instance);
+
+    return (meta && meta.container) || null;
+  }
+
   registerFactory(type: string, name: Key, factory: Factory): void {
     cacheFor(this.factoryRegistrations, type)[name] = factory;
   }
