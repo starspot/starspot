@@ -28,11 +28,11 @@ export class Response implements Application.Response {
   _headers: Dict<string> = {};
 
   setHeader(header: string, content: string) {
-    this._headers[header] = content;
+    this._headers[header.toLowerCase()] = content;
   }
 
   getHeader(header: string) {
-    return this._headers[header];
+    return this._headers[header.toLowerCase()];
   }
 
   write(buffer: string | Buffer) {
@@ -43,7 +43,7 @@ export class Response implements Application.Response {
   end() { }
 
   toJSON(): {} {
-    return JSON.parse(this.writeBuffer);
+    return this.writeBuffer ? JSON.parse(this.writeBuffer) : undefined;
   }
 }
 
@@ -51,11 +51,27 @@ export function createRequest(url: string, method: string = "GET"): Request {
   return new Request(url, method);
 }
 
+export function createJSONRequest(url: string, json: any): Request;
+export function createJSONRequest(url: string, method: any, json?: any): Request;
+export function createJSONRequest(url: string, method: any, json?: any): Request {
+  if (arguments.length === 2) {
+    if (typeof method !== "string") {
+      json = method;
+      method = "GET";
+    }
+  }
+
+  let request = createRequest(url, method);
+  request.body = JSON.stringify(json);
+
+  return request;
+}
+
 export function createResponse(): Response {
   return new Response();
 }
 
-export function createApplication(routes?: Function) {
+export function createApplication() {
   let container = new Container();
   let ui = new UI({ logLevel: UI.LogLevel.Error });
   let app = new Application({ container, ui });
@@ -71,9 +87,13 @@ export class ApplicationBuilderDSL {
   constructor(private app: Application,
               private container: Container) { }
 
-  controller(name: string, klass: typeof Controller & Factory) {
-    this.container.registerFactory("controller", name, klass);
+  register(type: string, name: string, klass: Factory) {
+    this.container.registerFactory(type, name, klass);
     return this;
+  }
+
+  controller(name: string, klass: typeof Controller & Factory) {
+    return this.register("controller", name, klass);
   }
 
   routes(cb: (dsl: Router.DSL) => void) {
@@ -87,9 +107,7 @@ export class ApplicationBuilderDSL {
   }
 
   boot(): Promise<Application> {
-    let { app } = this;
-
-    return app.boot()
-      .then(() => app);
+    return this.app.boot()
+      .then(() => this.app);
   }
 }

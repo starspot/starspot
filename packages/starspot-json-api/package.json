@@ -30,14 +30,16 @@
   },
   "homepage": "https://github.com/starspot/starspot#readme",
   "dependencies": {
+    "inflected": "^1.1.7",
     "starspot-core": "^0.4.4"
   },
   "devDependencies": {
     "@types/chai": "^3.4.33",
+    "@types/inflected": "^1.1.29",
     "@types/mocha": "^2.2.32",
     "mocha": "^3.0.2",
+    "starspot-test-core": "^0.4.4",
     "tslint": "^3.15.1",
-    "typescript": "^2.1.0-dev.20160921",
-    "starspot-test-core": "^0.4.4"
+    "typescript": "^2.1.0-dev.20160921"
   }
 }

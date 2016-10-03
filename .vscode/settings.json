@@ -2,6 +2,11 @@
 {
   "typescript.tsdk": "./packages/starspot-core/node_modules/typescript/lib/",
   "editor.tabSize": 2,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/dist": true
+  },
   "search.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,

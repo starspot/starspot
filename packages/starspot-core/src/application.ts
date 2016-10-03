@@ -90,7 +90,13 @@ class Application {
 
       if (controller && controller[method]) {
         try {
-          let params = new Controller.Parameters(request, response);
+          let params = new Controller.Parameters({
+            action: method,
+            controllerName,
+            request,
+            response
+          });
+
           result = Promise.resolve(controller[method](params));
         } catch (e) {
           result = Promise.reject(e);
@@ -112,7 +118,9 @@ class Application {
             response.setHeader("Content-Type", "application/json");
           }
 
-          response.write(JSON.stringify(json));
+          if (json !== undefined) {
+            response.write(JSON.stringify(json));
+          }
         }
 
         response.end();
