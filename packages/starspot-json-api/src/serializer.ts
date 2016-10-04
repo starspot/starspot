@@ -1,20 +1,5 @@
 import JSONAPI from "./index";
 
-        // if (Array.isArray(model)) {
-        //   if (model[0] && serializer.canSerialize(model[0])) {
-        //     json = serializer.serializeMany(model);
-        //   }
-        // } else if (serializer.canSerialize(model)) {
-        //   json = serializer.serialize(model);
-        // }
-
-        // if (expectsHTMLResponse(request)) {
-        //   this.sendJSONAsHTML(json || model, response);
-        // } else {
-        //   response.setHeader("Content-Type", "application/json");
-        //   response.write(JSON.stringify(json || model));
-        // }
-
 interface Attributes {
   [attr: string]: any;
 }
@@ -58,6 +43,7 @@ function protocolFor(obj: any) {
 }
 
 namespace Serializer {
+  export let SYMBOL = "@@SerializerProtocol";
   export type ID = JSONAPI.ID;
 
   export interface Protocol<T> {
