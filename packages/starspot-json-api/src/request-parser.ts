@@ -1,7 +1,7 @@
 import inflected = require("inflected");
 import { Container } from "starspot-core";
 
-import Operation, { ResourcesOperation } from "./operation";
+import Operation, { GetResourcesOperation } from "./operation";
 import Resource from "./resource";
 import UnhandledActionError from "./errors/unhandled-action-error";
 import JSONAPI from "./index";
@@ -51,7 +51,7 @@ export default class RequestParser {
   }
 
   processIndex() {
-    let op = new ResourcesOperation(this.resource);
+    let op = new GetResourcesOperation(this.resource);
     this.operations.push(op);
   }
 

@@ -1,4 +1,5 @@
 import Resource from "./resource";
+import ResourceSerializer from "./resource-serializer";
 import JSONAPI from "./index";
 
 abstract class Operation {
@@ -10,7 +11,7 @@ abstract class Operation {
 
 export default Operation;
 
-export class ResourcesOperation extends Operation {
+export class GetResourcesOperation extends Operation {
   resource: Resource;
 
   constructor(resource: Resource) {
@@ -19,18 +20,11 @@ export class ResourcesOperation extends Operation {
   }
 
   process(): JSONAPI.DataDocument {
-    let resource = this.resource;
-    let resources = resource.findAll();
-
-    let serializedResources = resources.map(r => {
-      return {
-        id: r.id,
-        type: r.type
-      };
-    });
+    let resources = this.resource._findAll();
+    let serializer = new ResourceSerializer();
 
     return {
-      data: serializedResources
+      data: resources.map(r => serializer.serializeResource(r))
     };
   }
 }
