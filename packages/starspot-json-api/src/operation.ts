@@ -1,8 +1,23 @@
+import Inflected = require("inflected");
+
 import Resource from "./resource";
-import ResourceSerializer from "./resource-serializer";
+import ResourceSerializer from "./serializer";
+import { Container } from "starspot-core";
 import JSONAPI from "./index";
 
+export interface OperationOptions {
+  [key: string]: any;
+  container?: Container;
+}
+
+export type ResourceFinder = typeof Resource;
+
 abstract class Operation {
+  constructor(options: OperationOptions) {
+    Object.assign(this, options);
+  }
+
+  container: Container;
   resource?: Resource;
   resources?: Resource;
 
@@ -12,19 +27,19 @@ abstract class Operation {
 export default Operation;
 
 export class GetResourcesOperation extends Operation {
-  resource: Resource;
+  name: string;
 
-  constructor(resource: Resource) {
-    super();
-    this.resource = resource;
+  get Resource(): ResourceFinder {
+    let name = Inflected.singularize(this.name);
+    return this.container.findFactory("resource", name);
   }
 
   process(): JSONAPI.DataDocument {
-    let resources = this.resource._findAll();
     let serializer = new ResourceSerializer();
+    let Resource = this.Resource;
 
-    return {
-      data: resources.map(r => serializer.serializeResource(r))
-    };
+    let resources = Resource.findAll().map(model => new Resource(model));
+
+    return serializer.serializeMany(resources);
   }
 }

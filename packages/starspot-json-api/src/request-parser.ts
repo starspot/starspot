@@ -1,10 +1,14 @@
 import inflected = require("inflected");
 import { Container } from "starspot-core";
 
-import Operation, { GetResourcesOperation } from "./operation";
+import Operation, { OperationOptions, GetResourcesOperation } from "./operation";
 import Resource from "./resource";
 import UnhandledActionError from "./errors/unhandled-action-error";
 import JSONAPI from "./index";
+
+export interface ConcreteOperation {
+  new (options: {}): Operation;
+}
 
 export interface RequestParameters {
   /** The controller action used to process this request. */
@@ -51,8 +55,13 @@ export default class RequestParser {
   }
 
   processIndex() {
-    let op = new GetResourcesOperation(this.resource);
-    this.operations.push(op);
+    this.op(GetResourcesOperation, { name: this.params.controllerName });
+  }
+
+  op(Op: ConcreteOperation, options: OperationOptions) {
+    options.container = this.container;
+
+    this.operations.push(new Op(options));
   }
 
   get resource(): Resource {

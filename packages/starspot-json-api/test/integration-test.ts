@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import ResourceController from "../src/resource-controller";
 import Resource from "../src/resource";
+import Reflector from "../src/reflector";
+import Inflected = require("inflected");
 import Serializer from "../src/serializer";
 
 function createJSONAPIRequest(method: string, url: string, json?: any) {
@@ -12,37 +14,53 @@ function createJSONAPIRequest(method: string, url: string, json?: any) {
 }
 
 describe("Resources", function() {
-  class Model {
-    static attributes: string[];
-    [attribute: string]: any;
-    _type: string;
-    _id: string;
-  }
-
-  class ModelSerializer implements Serializer.Protocol<Model> {
-    getType(model: Model) {
+  class ModelReflector implements Reflector {
+    getType(model: any) {
       return model._type;
     }
 
-    getID(model: Model) {
+    getID(model: any) {
       return model._id;
     }
 
-    getAttributes(model: Model) {
-      return (model.constructor as typeof Model).attributes;
+    getAttributes(model: any) {
+      let verboten = ["_id", "_type"];
+      let attributes = Object.keys(model).filter(k => verboten.indexOf(k) < 0);
+
+      return attributes;
     }
 
-    getAttribute(model: Model, attribute: string) {
+    getAttribute(model: any, attribute: string) {
       return model[attribute];
     }
+  }
+
+  class Model {
+    _id: string;
+
+    constructor(options: any) {
+      this._id = options.id;
+      delete options.id;
+
+      Object.assign(this, options);
+    }
+
+    get _type() {
+      return Inflected.dasherize(this.constructor.name).toLowerCase();
+    }
+  }
+
+  Reflector.install(Model, new ModelReflector());
+
+  class Photo extends Model {
   }
 
   class PhotosController extends ResourceController {
   }
 
   class PhotoResource extends Resource {
-    findAll() {
-      return [{ id: "1245", name: "Steve" }];
+    static findAll() {
+      return [new Photo({ id: "1245", name: "Steve" })];
     }
   };
 
@@ -63,7 +81,13 @@ describe("Resources", function() {
     expect(response.statusCode).to.equal(200);
     expect(response.getHeader("content-type")).to.equal("application/vnd.api+json");
     expect(response.toJSON()).to.deep.equal({
-      data: []
+      data: [{
+        id: "1245",
+        type: "photo",
+        attributes: {
+          name: "Steve"
+        }
+      }]
     });
   });
 });
