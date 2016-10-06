@@ -55,7 +55,7 @@ export function createResponse(): FakeResponse {
   return new FakeResponse();
 }
 
-export function createApplication(routes?: Function) {
+export function createApplication() {
   let container = new Container();
   let ui = new UI({ logLevel: UI.LogLevel.Error });
   let app = new Application({ container, ui });
@@ -87,7 +87,7 @@ export class ApplicationBuilderDSL {
   }
 
   boot(): Promise<Application> {
-    let { app } = this;
+    let app = this.app;
 
     return app.boot()
       .then(() => app);

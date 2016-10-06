@@ -38,8 +38,8 @@ export class GetResourcesOperation extends Operation {
     let serializer = new ResourceSerializer();
     let Resource = this.Resource;
 
-    let resources = Resource.findAll().map(model => new Resource(model));
-
+    // let resources = Resource.findAll().map(model => new Resource(model));
+    let resources = Resource.findAll();
     return serializer.serializeMany(resources);
   }
 }
