@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import RequestParser from "../src/request-parser";
-import Operation from "../src/operation";
+import Operation, { GetResourcesOperation } from "../src/operation";
 import { Container } from "starspot-core";
 
 describe("Request Parser", function() {
@@ -18,27 +18,22 @@ describe("Request Parser", function() {
     expect(operations.length).to.equal(1);
 
     let operation = operations[0];
-    expect(operation.op).to.equal("get");
-    expect(operation.resource).to.be.an.instanceof(PhotoResource);
+    expect(operation).to.be.an.instanceof(GetResourcesOperation);
   });
 
 });
-
-function opName(operation: Operation) {
-  return operation.op;
-}
 
 class PhotoResource {
 }
 
 class Parameters {
   public action: string;
-  public controller: string;
+  public controllerName: string;
   private _json: any;
 
   constructor(target: string, json?: any) {
     let [controller, action] = target.split("#", 2);
-    this.controller = controller;
+    this.controllerName = controller;
     this.action = action;
 
     this._json = json;

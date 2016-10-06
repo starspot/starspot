@@ -34,7 +34,7 @@ describe("ControllerParameters", function() {
 
   it("parses JSON from the request if it is a readable stream", async function() {
     let request: any = new Readable({
-      read(size) {
+      read() {
         this.push(JSON.stringify({ "hello": "world" }));
         this.push(null);
       }
