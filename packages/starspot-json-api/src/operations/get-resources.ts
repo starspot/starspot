@@ -9,8 +9,7 @@ export default class GetResourcesOperation extends Operation {
     let serializer = new Serializer();
     let Resource = this.findResource(this.name);
 
-    // let resources = Resource.findAll().map(model => new Resource(model));
-    let resources = Resource.findAll();
+    let resources = Resource.findAll().map(model => new Resource(model));
     return serializer.serializeMany(resources);
   }
 }

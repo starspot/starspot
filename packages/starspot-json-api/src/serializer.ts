@@ -33,7 +33,7 @@ function serializeModel(model: any): JSONAPI.ResourceObject  {
   }
 
   return {
-    id: reflector.getID(model),
+    id: reflector.getID(model)+"",
     type: reflector.getType(model),
     attributes: attributes
   };

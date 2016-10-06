@@ -7,6 +7,7 @@
 
     // Environment Configuration
     "lib": ["es2015", "es2016"],
+    "experimentalDecorators": true,
     "moduleResolution": "node",
 
     // Compilation Configuration

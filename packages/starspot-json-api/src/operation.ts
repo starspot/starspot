@@ -8,7 +8,7 @@ export interface OperationOptions {
   container?: Container;
 }
 
-export type ResourceFinder = typeof Resource;
+export type ResourceClass = typeof Resource;
 
 abstract class Operation {
   constructor(options: OperationOptions) {
@@ -21,7 +21,7 @@ abstract class Operation {
 
   abstract process(): void;
 
-  protected findResource(name: string) {
+  protected findResource(name: string): ResourceClass {
     name = Inflected.singularize(name);
     return this.container.findFactory("resource", name);
   }
