@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/starspot/starspot#readme",
   "devDependencies": {
+    "@types/chai": "^3.4.34",
     "@types/chalk": "^0.4.28",
     "@types/inflected": "^1.1.28",
     "@types/mocha": "^2.2.29",
