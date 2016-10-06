@@ -1,7 +1,8 @@
 import inflected = require("inflected");
 import { Container } from "starspot-core";
 
-import Operation, { OperationOptions, GetResourcesOperation } from "./operation";
+import Operation, { OperationOptions } from "./operation";
+import GetResourcesOperation from "./operations/get-resources";
 import Resource from "./resource";
 import UnhandledActionError from "./errors/unhandled-action-error";
 import JSONAPI from "./index";

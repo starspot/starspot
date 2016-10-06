@@ -4,7 +4,6 @@ import ResourceController from "../src/resource-controller";
 import Resource from "../src/resource";
 import Reflector from "../src/reflector";
 import Inflected = require("inflected");
-import Serializer from "../src/serializer";
 
 function createJSONAPIRequest(method: string, url: string, json?: any) {
   let request = createJSONRequest(url, method, json);

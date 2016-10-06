@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import RequestParser from "../src/request-parser";
-import Operation, { GetResourcesOperation } from "../src/operation";
+import GetResourcesOperation from "../src/operations/get-resources";
 import { Container } from "starspot-core";
 
 describe("Request Parser", function() {
