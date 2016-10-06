@@ -1,18 +1,1 @@
-{
-  "compilerOptions": {
-    // Enhance strictness
-    "noImplicitAny": true,
-
-    // Module configuration
-    "moduleResolution": "node",
-    "target": "es2015",
-    "module": "commonjs",
-    "declaration": true
-  },
-
-  "include": [
-    "src/**/*.ts",
-    "src/typings/**/*.d.ts",
-    "test/**/*.ts"
-  ]
-}
+../../shared/tsconfig.json
