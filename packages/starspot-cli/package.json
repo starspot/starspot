@@ -44,7 +44,8 @@
     "request": "^2.74.0",
     "request-promise": "^4.1.1",
     "ts-node": "^1.3.0",
-    "typescript": "2.1.0-dev.20160810"
+    "tslint": "^4.0.0-dev.0",
+    "typescript": "^2.1.0-dev.20161005"
   },
   "dependencies": {
     "blueprinter": "^0.1.3",
