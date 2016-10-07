@@ -13,6 +13,10 @@ export interface Formatters {
 
 export default <Formatters>{
   "info": {
+    "custom-message"({ message }) {
+      return message;
+    },
+
     "server-started"({ address }) {
       return `Listening on ${address.url}`;
     },
