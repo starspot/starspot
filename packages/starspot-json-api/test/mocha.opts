@@ -1,2 +1,2 @@
 --watch-extensions ts
---compilers ts:../../node_modules/ts-node/register
+--compilers ts:ts-node/register

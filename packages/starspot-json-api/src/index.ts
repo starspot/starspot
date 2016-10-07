@@ -9,6 +9,7 @@ namespace JSONAPI {
 
   export type Value = string | number | boolean | {};
 
+  export const CONTENT_TYPE = "application/vnd.api+json";
   export interface MetaObject {
     [key: string]: any;
   }

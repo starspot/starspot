@@ -4,13 +4,13 @@ import {
   Container,
   Controller,
   UI
-} from "../../src";
+} from "starspot-core";
 
 export interface Dict<T> {
   [key: string]: T;
 }
 
-export class FakeRequest implements Application.Request {
+export class Request implements Application.Request {
   public headers: { [key: string]: string };
   public body: string;
 
@@ -21,18 +21,18 @@ export class FakeRequest implements Application.Request {
   }
 }
 
-export class FakeResponse implements Application.Response {
+export class Response implements Application.Response {
   statusCode = 200;
   writeBuffer = "";
 
   _headers: Dict<string> = {};
 
   setHeader(header: string, content: string) {
-    this._headers[header] = content;
+    this._headers[header.toLowerCase()] = content;
   }
 
   getHeader(header: string) {
-    return this._headers[header];
+    return this._headers[header.toLowerCase()];
   }
 
   write(buffer: string | Buffer) {
@@ -43,16 +43,32 @@ export class FakeResponse implements Application.Response {
   end() { }
 
   toJSON(): {} {
-    return JSON.parse(this.writeBuffer);
+    return this.writeBuffer ? JSON.parse(this.writeBuffer) : undefined;
   }
 }
 
-export function createRequest(url: string, method: string = "GET"): FakeRequest {
-  return new FakeRequest(url, method);
+export function createRequest(url: string, method: string = "GET"): Request {
+  return new Request(url, method);
 }
 
-export function createResponse(): FakeResponse {
-  return new FakeResponse();
+export function createJSONRequest(url: string, json: any): Request;
+export function createJSONRequest(url: string, method: any, json?: any): Request;
+export function createJSONRequest(url: string, method: any, json?: any): Request {
+  if (arguments.length === 2) {
+    if (typeof method !== "string") {
+      json = method;
+      method = "GET";
+    }
+  }
+
+  let request = createRequest(url, method);
+  request.body = JSON.stringify(json);
+
+  return request;
+}
+
+export function createResponse(): Response {
+  return new Response();
 }
 
 export function createApplication() {
@@ -71,9 +87,13 @@ export class ApplicationBuilderDSL {
   constructor(private app: Application,
               private container: Container) { }
 
-  controller(name: string, klass: typeof Controller & Factory) {
-    this.container.registerFactory("controller", name, klass);
+  register(type: string, name: string, klass: Factory) {
+    this.container.registerFactory(type, name, klass);
     return this;
+  }
+
+  controller(name: string, klass: typeof Controller & Factory) {
+    return this.register("controller", name, klass);
   }
 
   routes(cb: (dsl: Router.DSL) => void) {
@@ -87,9 +107,7 @@ export class ApplicationBuilderDSL {
   }
 
   boot(): Promise<Application> {
-    let app = this.app;
-
-    return app.boot()
-      .then(() => app);
+    return this.app.boot()
+      .then(() => this.app);
   }
 }

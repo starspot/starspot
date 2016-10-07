@@ -2,6 +2,26 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Debug starspot-json-api Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/packages/starspot-json-api/node_modules/.bin/_mocha",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${workspaceRoot}/packages/starspot-json-api",
+      "preLaunchTask": null,
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "externalConsole": false,
+      "sourceMaps": true,
+      "outDir": null
+    },
+    {
       "name": "Launch",
       "type": "node",
       "request": "launch",
@@ -41,6 +61,14 @@
       "port": 5858,
       "sourceMaps": false,
       "outDir": null
+    },
+    {
+      "name": "Debug Create Package Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/scripts/create-package",
+      "args": ["starspot-test-core"],
+      "cwd": "${workspaceRoot}"
     }
   ]
 }

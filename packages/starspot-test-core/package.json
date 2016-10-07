@@ -1,13 +1,12 @@
 {
-  "name": "starspot-json-api",
-  "version": "0.4.3",
-  "description": "Utilities and type definitions for the JSON-API specification.",
+  "name": "starspot-test-core",
+  "version": "0.4.4",
+  "description": "DSL and utilities for programmatically defining and testing a Starspot application.",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",
     "build": "tsc -p tsconfig.build.json",
-    "prepublish": "npm test && npm run build",
-    "postversion": "npm publish && git push && git push --tags"
+    "prepublish": "npm test && npm run build"
   },
   "typings": "dist/index.d.ts",
   "files": [
@@ -18,10 +17,7 @@
     "url": "git+https://github.com/starspot/starspot.git"
   },
   "keywords": [
-    "json-api",
-    "json",
-    "api",
-    "json:api"
+    "starspot"
   ],
   "author": "Tom Dale <tom@tomdale.net>",
   "license": "MIT",
@@ -30,17 +26,12 @@
   },
   "homepage": "https://github.com/starspot/starspot#readme",
   "dependencies": {
-    "inflected": "^1.1.7",
-    "starspot-core": "^0.4.4"
+    "starspot-core": "0.4.5"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",
-    "@types/inflected": "^1.1.29",
-    "@types/mocha": "^2.2.32",
-    "@types/node": "^6.0.45",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
-    "starspot-test-core": "^0.4.4",
     "ts-node": "^1.3.0",
     "tslint": "^4.0.0-dev.0",
     "typescript": "^2.1.0-dev.20161005"

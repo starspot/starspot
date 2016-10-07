@@ -36,7 +36,7 @@ export default class ServerCommand extends Command {
     let dnsTask = this.project.getTask("start-dns");
     let serverTask = this.project.getTask("start-server");
 
-    let [, address] = await Promise.all<void, ServerAddressInfo>([dnsTask.invoke(), serverTask.invoke()]);
+    let [, address] = await Promise.all([dnsTask.invoke(), serverTask.invoke()]);
 
     this.ui.info({ name: "server-started", address });
 

@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
-    // Enhance strictness
+    // Enhance Strictness
     "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
 
-    // Module configuration
+    // Environment Configuration
+    "lib": ["es2015", "es2016"],
+    "experimentalDecorators": true,
     "moduleResolution": "node",
-    "target": "es2015",
+
+    // Compilation Configuration
+    "target": "es6",
     "module": "commonjs",
+    "inlineSourceMap": true,
     "declaration": true
   },
 
