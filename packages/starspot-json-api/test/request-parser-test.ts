@@ -2,6 +2,7 @@ import { expect } from "chai";
 import RequestParser from "../src/request-parser";
 import GetResourcesOperation from "../src/operations/get-resources";
 import { Container } from "starspot-core";
+import { createRequest } from "starspot-test-core";
 
 describe("Request Parser", function() {
 
@@ -29,6 +30,7 @@ class PhotoResource {
 class Parameters {
   public action: string;
   public controllerName: string;
+  public request = createRequest("/", "GET");
   private _json: any;
 
   constructor(target: string, json?: any) {

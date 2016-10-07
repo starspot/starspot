@@ -16,13 +16,15 @@ abstract class Operation {
   }
 
   container: Container;
+
+  resourceName: string;
   resource?: Resource;
   resources?: Resource;
 
-  abstract process(): void;
+  abstract async process(): Promise<any>;
 
-  protected findResource(name: string): ResourceClass {
-    name = Inflected.singularize(name);
+  protected findResource(): ResourceClass {
+    let name = Inflected.singularize(this.resourceName);
     return this.container.findFactory("resource", name);
   }
 }

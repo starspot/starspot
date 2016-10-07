@@ -1,15 +1,15 @@
-import JSONAPI from "../index";
 import Operation from "../operation";
-import Serializer from "../serializer";
+import { ResourcesResult } from "../results";
 
 export default class GetResourcesOperation extends Operation {
   name: string;
 
-  process(): JSONAPI.DataDocument {
-    let serializer = new Serializer();
-    let Resource = this.findResource(this.name);
+  async process() {
+    let Resource = this.findResource();
 
-    let resources = Resource.findAll().map(model => new Resource(model));
-    return serializer.serializeMany(resources);
+    let models = await Resource.findAll()
+    let resources = models.map(model => new Resource(model));
+
+    return new ResourcesResult(resources);
   }
 }

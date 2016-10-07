@@ -1,11 +1,15 @@
 import inflected = require("inflected");
 import { Application, Container } from "starspot-core";
 
+import Resource from "./resource";
+import JSONAPI from "./index";
+
 import Operation, { OperationOptions } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
-import Resource from "./resource";
+import CreateResourceOperation from "./operations/create-resource";
+
 import UnhandledActionError from "./errors/unhandled-action-error";
-import JSONAPI from "./index";
+import { ResourceTypeMismatch } from "./exceptions";
 
 export interface ConcreteOperation {
   new (options: {}): Operation;
@@ -59,17 +63,22 @@ export default class RequestParser {
   }
 
   processIndex() {
-    this.op(GetResourcesOperation, { name: this.params.controllerName });
+    this.op(GetResourcesOperation, {
+      resourceName: this.params.controllerName
+    });
   }
 
   processCreate() {
     let data = this.json.data as JSONAPI.ResourceObject;
-
     let { type, id, attributes } = data;
+    let resourceName = this.params.controllerName;
+
+    if (type !== resourceName) {
+      throw new ResourceTypeMismatch();
+    }
 
     this.op(CreateResourceOperation, {
-      name: this.params.controllerName,
-      type,
+      resourceName: this.params.controllerName,
       id,
       attributes
     });

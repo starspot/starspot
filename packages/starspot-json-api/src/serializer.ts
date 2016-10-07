@@ -1,11 +1,55 @@
 import JSONAPI from "./index";
 import Reflector from "./reflector";
+import Resource from "./resource";
+import { Result, ResourceResult, ResourcesResult } from "./results";
 
 interface Attributes {
   [attr: string]: any;
 }
 
 class Serializer {
+  isCollection: boolean;
+  includedResources: Resource[] = [];
+  primaryResources: Resource[] = [];
+
+  serializeResults(results: Result[]) {
+    this.processResults(results);
+
+    let statusCode = results[0].statusCode;
+
+    if (this.isCollection) {
+      return {
+        json: this.serializeMany(this.primaryResources),
+        statusCode
+      };
+    } else {
+      return {
+        json: this.serialize(this.primaryResources[0]),
+        statusCode
+      };
+    }
+  }
+
+  processResults(results: Result[]) {
+    for (let result of results) {
+      if (result instanceof ResourceResult) {
+        this.processResource(result);
+      } else if (result instanceof ResourcesResult) {
+        this.processResources(result);
+      }
+    }
+  }
+
+  processResource(result: ResourceResult) {
+    this.isCollection = false;
+    this.primaryResources.push(result.resource);
+  }
+
+  processResources(result: ResourcesResult) {
+    this.isCollection = true;
+    this.primaryResources.push(...result.resources);
+  }
+
   serialize(model: any): JSONAPI.DataDocument {
     let data = serializeModel(model);
 

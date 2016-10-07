@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import ResourceController from "../src/resource-controller";
-import Resource, { attribute } from "../src/resource";
+import Resource, { writableAttributes } from "../src/resource";
 import Reflector from "../src/reflector";
 import Inflected = require("inflected");
 
@@ -13,9 +13,9 @@ describe("Fetching Data", function () {
 
     it("generates index documents", async function () {
 
-      @attribute("title")
+      @writableAttributes("title")
       class ArticleResource extends Resource {
-        static findAll() {
+        static async findAll() {
           return [new Model({
             _type: "articles",
             _id: 1,
@@ -72,9 +72,17 @@ describe("Fetching Data", function () {
   // http://jsonapi.org/format/upcoming/#crud-creating
   describe("Creating Resources", function () {
     it("allows a resource to be created", async function () {
+      class Photo extends Model { };
 
-      @attribute("title")
+      @writableAttributes("title", "src")
       class PhotoResource extends Resource {
+        static async create(options: Resource.CreateOptions) {
+          let newAttrs = Object.assign({
+            id: "1234"
+          }, options.attributes);
+
+          return new Photo(newAttrs);
+        }
       }
 
       let app = await createApplication()
@@ -98,16 +106,17 @@ describe("Fetching Data", function () {
 
       await app.dispatch(request, response);
 
-      expect(response.statusCode).to.equal(200);
+      expect(response.statusCode).to.equal(201);
       expect(response.getHeader("content-type")).to.equal("application/vnd.api+json");
       expect(response.toJSON()).to.deep.equal({
-        data: [{
-          id: "1245",
-          type: "photo",
-          attributes: {
-            name: "Steve"
-          }
-        }]
+        data: {
+          "type": "photos",
+          "id": "1234",
+          "attributes": {
+            "title": "Ember Hamster",
+            "src": "http://example.com/images/productivity.png"
+          },
+        }
       });
 
     });
