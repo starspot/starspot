@@ -37,6 +37,7 @@
     "@types/chai": "^3.4.34",
     "@types/inflected": "^1.1.29",
     "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.45",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
     "starspot-test-core": "^0.4.4",
