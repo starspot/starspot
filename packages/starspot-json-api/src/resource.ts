@@ -1,5 +1,5 @@
 import Reflector from "./reflector";
-import JSONAPI from "./index";
+import JSONAPI from "./json-api";
 import Inflected = require("inflected");
 
 /**

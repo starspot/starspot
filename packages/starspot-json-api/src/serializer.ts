@@ -1,4 +1,4 @@
-import JSONAPI from "./index";
+import JSONAPI from "./json-api";
 import Reflector from "./reflector";
 import Resource from "./resource";
 import { Result, ResourceResult, ResourcesResult } from "./results";

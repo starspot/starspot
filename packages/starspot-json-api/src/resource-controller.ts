@@ -2,7 +2,7 @@ import { Controller, Container } from "starspot-core";
 import RequestParser from "./request-parser";
 import Serializer from "./serializer";
 import { Result } from "./results";
-import JSONAPI from "./index";
+import JSONAPI from "./json-api";
 
 export default class ResourceController extends Controller {
   async index(params: Controller.Parameters) {

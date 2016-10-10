@@ -1,6 +1,6 @@
 import Operation from "../operation";
 import { ResourceResult } from "../results";
-import JSONAPI from "../index";
+import JSONAPI from "../json-api";
 
 export default class CreateResourceOperation extends Operation {
   attributes: JSONAPI.AttributesObject;

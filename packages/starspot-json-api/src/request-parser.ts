@@ -2,7 +2,7 @@ import inflected = require("inflected");
 import { Application, Container } from "starspot-core";
 
 import Resource from "./resource";
-import JSONAPI from "./index";
+import JSONAPI from "./json-api";
 
 import Operation, { OperationOptions } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
