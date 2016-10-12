@@ -87,7 +87,7 @@ namespace Router {
   * When class methods are pulled out like this, they lose the binding to their
   * class instance when invoked. Instead, we set each DSL method to a function
   * expression which binds `this` to the appropriate lexical scope.
-  * 
+  *
   */
   export class DSL {
     constructor(private _router: Router) {

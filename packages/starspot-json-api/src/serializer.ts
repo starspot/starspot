@@ -9,8 +9,8 @@ interface Attributes {
 
 class Serializer {
   isCollection: boolean;
-  includedResources: Resource[] = [];
-  primaryResources: Resource[] = [];
+  includedResources: Resource<any>[] = [];
+  primaryResources: Resource<any>[] = [];
 
   serializeResults(results: Result[]) {
     this.processResults(results);

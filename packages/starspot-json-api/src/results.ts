@@ -7,13 +7,13 @@ export class Result {
 }
 
 export class ResourceResult extends Result {
-  constructor(public resource: Resource, statusCode?: number) {
+  constructor(public resource: Resource<any>, statusCode?: number) {
     super(statusCode);
   }
 }
 
 export class ResourcesResult extends Result {
-  constructor(public resources: Resource[], statusCode?: number) {
+  constructor(public resources: Resource<any>[], statusCode?: number) {
     super(statusCode);
   }
 }

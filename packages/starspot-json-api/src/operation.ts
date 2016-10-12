@@ -18,8 +18,8 @@ abstract class Operation {
   container: Container;
 
   resourceName: string;
-  resource?: Resource;
-  resources?: Resource;
+  resource?: Resource<any>;
+  resources?: Resource<any>;
 
   abstract async process(): Promise<any>;
 

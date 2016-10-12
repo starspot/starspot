@@ -90,7 +90,7 @@ export default class RequestParser {
     this.operations.push(new Op(options));
   }
 
-  get resource(): Resource {
+  get resource(): Resource<any> {
     let resourceName = inflected.singularize(this.params.controllerName);
     return this.container.findInstance("resource", resourceName);
   }
