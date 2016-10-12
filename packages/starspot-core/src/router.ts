@@ -1,4 +1,5 @@
 import RouteRecognizer = require("route-recognizer");
+import Inflected = require("inflected");
 
 export interface Handler {
   controller: string;
@@ -95,7 +96,7 @@ namespace Router {
 
     resources = (routeName: string): void => {
       let router = this._router;
-      let controller = routeName;
+      let controller = Inflected.singularize(routeName);
       let path = routeName;
       let memberPath = routeName + "/:id";
 

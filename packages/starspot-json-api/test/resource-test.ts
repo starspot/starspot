@@ -12,7 +12,7 @@ describe("Resource", function() {
 
     it("inherits through subclasses", function() {
       @attributes("a1", "a2")
-      class A extends Resource {
+      class A extends Resource<any> {
         @attribute
         a3: string;
       }
@@ -37,7 +37,7 @@ describe("Resource", function() {
     });
 
     it("can be overwritten by subclasses", function() {
-      class A extends Resource {
+      class A extends Resource<any> {
         @attribute
         a1: string
       }

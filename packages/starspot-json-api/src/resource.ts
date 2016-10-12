@@ -1,5 +1,4 @@
-import { Model } from "starspot-core";
-import Reflector from "./reflector";
+import { Model, Reflector } from "starspot-core";
 import JSONAPI from "./json-api";
 import Inflected = require("inflected");
 
@@ -39,7 +38,16 @@ class Resource<T extends Model> {
     this.model = model;
   }
 
-  validate?(): Promise<boolean>;
+  async validate(): Promise<boolean> {
+    let model = this.model;
+
+    if (typeof model.validate === "function") {
+      return model.validate();
+    } else {
+      return Reflector.get(model).validate(model);
+    }
+  }
+
   static async findAll?(): Promise<any[]>;
   static async create?(options: Resource.CreateOptions): Promise<any>;
 }
@@ -75,15 +83,6 @@ class ResourceReflector implements Reflector {
   getAttribute(resource: Resource<any>, attribute: string) {
     let model = resource.model;
     return Reflector.get(model).getAttribute(model, attribute);
-  }
-
-  async validate(resource: Resource<any>): Promise<boolean> {
-    if (typeof resource.validate === "function") {
-      return resource.validate();
-    } else {
-      let model = resource.model;
-      return Reflector.get(model).validate(model);
-    }
   }
 }
 

@@ -4,7 +4,7 @@ import { Application, Container } from "starspot-core";
 import Resource from "./resource";
 import JSONAPI from "./json-api";
 
-import Operation, { OperationOptions } from "./operation";
+import Operation, { OperationOptions, CallbackTarget } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
 import CreateResourceOperation from "./operations/create-resource";
 
@@ -34,10 +34,12 @@ export default class RequestParser {
   public params: RequestParameters;
   private operations: Operation[];
   private json: JSONAPI.DataDocument;
+  private target: CallbackTarget;
 
-  constructor(params: RequestParameters, container: Container) {
+  constructor(params: RequestParameters, container: Container, target: CallbackTarget) {
     this.params = params;
     this.container = container;
+    this.target = target;
   }
 
   async parse(): Promise<Operation[]> {
@@ -74,7 +76,7 @@ export default class RequestParser {
     let resourceName = this.params.controllerName;
 
     if (type !== resourceName) {
-      throw new ResourceTypeMismatch();
+      throw new ResourceTypeMismatch(type, resourceName);
     }
 
     this.op(CreateResourceOperation, {
@@ -86,6 +88,7 @@ export default class RequestParser {
 
   op(Op: ConcreteOperation, options: OperationOptions) {
     options.container = this.container;
+    options.target = this.target;
 
     this.operations.push(new Op(options));
   }

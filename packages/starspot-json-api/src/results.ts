@@ -1,6 +1,5 @@
 import Resource from "./resource";
 
-
 export class Result {
   constructor(public statusCode = 200) {
   }
