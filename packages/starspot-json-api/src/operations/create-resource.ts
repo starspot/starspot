@@ -22,6 +22,6 @@ export default class CreateResourceOperation extends Operation {
     let resource = new Resource(model);
     let isValid = await resource.validate();
 
-    return new ResourceResult(resource, isValid ? 200: 422);
+    return new ResourceResult(resource, isValid ? 201: 422);
   }
 }

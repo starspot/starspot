@@ -12,7 +12,7 @@ describe("Request Parser", function() {
 
     container.registerFactory("resource", "photo", PhotoResource);
 
-    let parser = new RequestParser(params, container);
+    let parser = new RequestParser(params, container, new Target());
 
     let operations = await parser.parse();
 
@@ -23,6 +23,10 @@ describe("Request Parser", function() {
   });
 
 });
+
+class Target {
+  invokeCallback() { }
+}
 
 class PhotoResource {
 }

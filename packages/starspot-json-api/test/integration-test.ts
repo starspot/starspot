@@ -31,7 +31,7 @@ describe("Fetching Data", function () {
         .routes(({ resources }) => {
           resources("articles");
         })
-        .controller("articles", class extends ResourceController {
+        .controller("article", class extends ResourceController {
 
         })
         .register("resource", "article", ArticleResource)
@@ -99,7 +99,7 @@ describe("Fetching Data", function () {
         .routes(({ resources }) => {
           resources("photos");
         })
-        .controller("photos", PhotoController)
+        .controller("photo", PhotoController)
         .register("resource", "photo", PhotoResource)
         .boot();
 

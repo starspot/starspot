@@ -73,10 +73,10 @@ export default class RequestParser {
   processCreate() {
     let data = this.json.data as JSONAPI.ResourceObject;
     let { type, id, attributes } = data;
-    let resourceName = this.params.controllerName;
+    let controllerType = this.params.controllerName;
 
-    if (type !== resourceName) {
-      throw new ResourceTypeMismatch(type, resourceName);
+    if (!typesMatch(type, controllerType)) {
+      throw new ResourceTypeMismatch(type, controllerType);
     }
 
     this.op(CreateResourceOperation, {
@@ -97,4 +97,14 @@ export default class RequestParser {
     let resourceName = inflected.singularize(this.params.controllerName);
     return this.container.findInstance("resource", resourceName);
   }
+}
+
+/**
+ * Verifies that a submitted resource's type matches the controller's type.
+ */
+function typesMatch(theirType: string, ourType: string) {
+  if (theirType === ourType) { return true; }
+  if (inflected.singularize(theirType) === ourType) { return true; }
+
+  return false;
 }

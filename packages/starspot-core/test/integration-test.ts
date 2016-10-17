@@ -20,9 +20,9 @@ describe("Integration: Route Dispatching", function () {
 
       let app = await test.createApplication()
         .routes(({ get }) => {
-          get("photos", { controller: "photos", method: "show" });
+          get("photos", { controller: "photo", method: "show" });
         })
-        .controller("photos", PhotoController)
+        .controller("photo", PhotoController)
         .boot();
 
       await app.dispatch(request, response);
@@ -51,7 +51,7 @@ describe("Integration: Route Dispatching", function () {
         .routes(({ resources }) => {
           resources("photos");
         })
-        .controller("photos", PhotoController)
+        .controller("photo", PhotoController)
         .boot();
 
       let request = test.createRequest("/photos");
@@ -93,7 +93,7 @@ describe("Integration: Route Dispatching", function () {
         .routes(({ resources }) => {
           resources("photos");
         })
-        .controller("photos", PromisePhotoController)
+        .controller("photo", PromisePhotoController)
         .boot();
 
       let request = test.createRequest("/photos");
@@ -124,7 +124,7 @@ describe("Integration: Route Dispatching", function () {
       .routes(({ resources }) => {
         resources("photos");
       })
-      .controller("photos", ErrorPhotoController)
+      .controller("photo", ErrorPhotoController)
       .boot();
 
     let request = test.createRequest("/photos");
@@ -150,7 +150,7 @@ describe("Integration: Route Dispatching", function () {
       .routes(({ resources }) => {
         resources("photos");
       })
-      .controller("photos", BodyPhotoController)
+      .controller("photo", BodyPhotoController)
       .boot();
 
     let request = test.createRequest("/photos");
