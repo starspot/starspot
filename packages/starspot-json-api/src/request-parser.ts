@@ -4,7 +4,7 @@ import { Application, Container } from "starspot-core";
 import Resource from "./resource";
 import JSONAPI from "./json-api";
 
-import Operation, { OperationOptions } from "./operation";
+import Operation, { OperationOptions, CallbackTarget } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
 import CreateResourceOperation from "./operations/create-resource";
 
@@ -34,10 +34,12 @@ export default class RequestParser {
   public params: RequestParameters;
   private operations: Operation[];
   private json: JSONAPI.DataDocument;
+  private target: CallbackTarget;
 
-  constructor(params: RequestParameters, container: Container) {
+  constructor(params: RequestParameters, container: Container, target: CallbackTarget) {
     this.params = params;
     this.container = container;
+    this.target = target;
   }
 
   async parse(): Promise<Operation[]> {
@@ -71,10 +73,10 @@ export default class RequestParser {
   processCreate() {
     let data = this.json.data as JSONAPI.ResourceObject;
     let { type, id, attributes } = data;
-    let resourceName = this.params.controllerName;
+    let controllerType = this.params.controllerName;
 
-    if (type !== resourceName) {
-      throw new ResourceTypeMismatch();
+    if (!typesMatch(type, controllerType)) {
+      throw new ResourceTypeMismatch(type, controllerType);
     }
 
     this.op(CreateResourceOperation, {
@@ -86,12 +88,23 @@ export default class RequestParser {
 
   op(Op: ConcreteOperation, options: OperationOptions) {
     options.container = this.container;
+    options.target = this.target;
 
     this.operations.push(new Op(options));
   }
 
-  get resource(): Resource {
+  get resource(): Resource<any> {
     let resourceName = inflected.singularize(this.params.controllerName);
     return this.container.findInstance("resource", resourceName);
   }
+}
+
+/**
+ * Verifies that a submitted resource's type matches the controller's type.
+ */
+function typesMatch(theirType: string, ourType: string) {
+  if (theirType === ourType) { return true; }
+  if (inflected.singularize(theirType) === ourType) { return true; }
+
+  return false;
 }

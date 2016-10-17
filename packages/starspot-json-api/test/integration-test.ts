@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
-import ResourceController from "../src/resource-controller";
+import { Reflector } from "starspot-core";
+import ResourceController, { after } from "../src/resource-controller";
 import Resource, { writableAttributes } from "../src/resource";
-import Reflector from "../src/reflector";
 import Inflected = require("inflected");
 
 // http://jsonapi.org/format/1.1/#fetching
@@ -12,9 +12,8 @@ describe("Fetching Data", function () {
   describe("Fetching Resources", function () {
 
     it("generates index documents", async function () {
-
       @writableAttributes("title")
-      class ArticleResource extends Resource {
+      class ArticleResource extends Resource<any> {
         static async findAll() {
           return [new Model({
             _type: "articles",
@@ -32,7 +31,9 @@ describe("Fetching Data", function () {
         .routes(({ resources }) => {
           resources("articles");
         })
-        .controller("articles", class extends ResourceController { })
+        .controller("article", class extends ResourceController {
+
+        })
         .register("resource", "article", ArticleResource)
         .boot();
 
@@ -75,7 +76,7 @@ describe("Fetching Data", function () {
       class Photo extends Model { };
 
       @writableAttributes("title", "src")
-      class PhotoResource extends Resource {
+      class PhotoResource extends Resource<any> {
         static async create(options: Resource.CreateOptions) {
           let newAttrs = Object.assign({
             id: "1234"
@@ -85,11 +86,20 @@ describe("Fetching Data", function () {
         }
       }
 
+      let didCreateWasCalled = false;
+      class PhotoController extends ResourceController {
+        @after("create")
+        didCreate(model: Photo) {
+          didCreateWasCalled = true;
+          expect(model).to.be.an.instanceof(Photo);
+        }
+      }
+
       let app = await createApplication()
         .routes(({ resources }) => {
           resources("photos");
         })
-        .controller("photos", class extends ResourceController { })
+        .controller("photo", PhotoController)
         .register("resource", "photo", PhotoResource)
         .boot();
 
@@ -106,6 +116,7 @@ describe("Fetching Data", function () {
 
       await app.dispatch(request, response);
 
+      expect(didCreateWasCalled).to.be.true;
       expect(response.statusCode).to.equal(201);
       expect(response.getHeader("content-type")).to.equal("application/vnd.api+json");
       expect(response.toJSON()).to.deep.equal({
@@ -148,6 +159,10 @@ class ModelReflector implements Reflector {
 
   getAttribute(model: any, attribute: string) {
     return model[attribute];
+  }
+
+  async validate() {
+    return true;
   }
 }
 

@@ -1,4 +1,4 @@
-import Reflector from "./reflector";
+import { Model, Reflector } from "starspot-core";
 import JSONAPI from "./json-api";
 import Inflected = require("inflected");
 
@@ -22,8 +22,8 @@ import Inflected = require("inflected");
  * That instance will control how the underlying model is converted into JSON
  * used to respond to the request.
  */
-class Resource {
-  model: any;
+class Resource<T extends Model> {
+  model: T;
 
   static _attributes: AttributeDescriptors;
   _attributes: AttributeDescriptors;
@@ -31,11 +31,21 @@ class Resource {
 
   // TypeScript can't infer constructor property for some reason.
   ["constructor"]: typeof Resource;
-  constructor(model?: any) {
+  constructor(model?: T) {
     this._attributes = merge({}, this._attributes, this.constructor._attributes);
     this._attributesList = Object.keys(this._attributes);
 
     this.model = model;
+  }
+
+  async validate(): Promise<boolean> {
+    let model = this.model;
+
+    if (typeof model.validate === "function") {
+      return model.validate();
+    } else {
+      return Reflector.get(model).validate(model);
+    }
   }
 
   static async findAll?(): Promise<any[]>;
@@ -54,23 +64,23 @@ function merge(target: any, ...sources: any[]) {
 }
 
 class ResourceReflector implements Reflector {
-  getType(resource: Resource) {
+  getType(resource: Resource<any>) {
     let model = resource.model;
     let type = Reflector.get(model).getType(model);
 
     return Inflected.pluralize(type);
   }
 
-  getID(resource: Resource) {
+  getID(resource: Resource<any>) {
     let model = resource.model;
     return Reflector.get(model).getID(model);
   }
 
-  getAttributes(resource: Resource) {
+  getAttributes(resource: Resource<any>) {
     return resource._attributesList;
   }
 
-  getAttribute(resource: Resource, attribute: string) {
+  getAttribute(resource: Resource<any>, attribute: string) {
     let model = resource.model;
     return Reflector.get(model).getAttribute(model, attribute);
   }
@@ -121,15 +131,15 @@ interface Attributable {
 /*
  * Property Decorators
  */
-export function attribute(resource: Resource, attribute: string) {
+export function attribute(resource: Resource<any>, attribute: string) {
   descriptorFor(resource, attribute);
 }
 
-export function writable(resource: Resource, attribute: string) {
+export function writable(resource: Resource<any>, attribute: string) {
   descriptorFor(resource, attribute).writable = true;
 }
 
-export function readOnly(resource: Resource, attribute: string) {
+export function readOnly(resource: Resource<any>, attribute: string) {
   descriptorFor(resource, attribute).writable = false;
 }
 

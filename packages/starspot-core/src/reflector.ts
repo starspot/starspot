@@ -2,11 +2,11 @@
  * A Reflector allows Starspot to retrieve information about a model. For
  * example, to serialize a model to JSON, Starspot needs to be able to ask it
  * for a list of its attributes.
- * 
+ *
  * Reflectors allow Starspot to be ORM-agnostic. Instead of hardcoding Starspot
  * to a particular ORM, anyone can write a reflector and install it on models of
- * their ORM of choice (or even use reflectors on objects that come from an
- * ORM).
+ * their ORM of choice (or even use reflectors on objects that don't come from
+ * an ORM).
  */
 
 interface Reflector {
@@ -14,6 +14,7 @@ interface Reflector {
   getID(model: any): string;
   getAttributes(model: any): string[];
   getAttribute(model: any, attribute: string): any;
+  validate?(model: any): Promise<boolean>;
 }
 
 namespace Reflector {
@@ -29,6 +30,10 @@ namespace Reflector {
 }
 
 export default Reflector;
+
+export interface Reflectable {
+  "@@StarspotReflector": Reflector;
+}
 
 export interface Factory {
   prototype: {};

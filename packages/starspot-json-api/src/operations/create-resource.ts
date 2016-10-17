@@ -17,8 +17,11 @@ export default class CreateResourceOperation extends Operation {
       attributes: this.attributes
     });
 
-    let resource = new Resource(model);
+    this.target.invokeCallback("create", model);
 
-    return new ResourceResult(resource, 201);
+    let resource = new Resource(model);
+    let isValid = await resource.validate();
+
+    return new ResourceResult(resource, isValid ? 201: 422);
   }
 }

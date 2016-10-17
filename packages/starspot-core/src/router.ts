@@ -1,4 +1,5 @@
 import RouteRecognizer = require("route-recognizer");
+import Inflected = require("inflected");
 
 export interface Handler {
   controller: string;
@@ -87,7 +88,7 @@ namespace Router {
   * When class methods are pulled out like this, they lose the binding to their
   * class instance when invoked. Instead, we set each DSL method to a function
   * expression which binds `this` to the appropriate lexical scope.
-  * 
+  *
   */
   export class DSL {
     constructor(private _router: Router) {
@@ -95,7 +96,7 @@ namespace Router {
 
     resources = (routeName: string): void => {
       let router = this._router;
-      let controller = routeName;
+      let controller = Inflected.singularize(routeName);
       let path = routeName;
       let memberPath = routeName + "/:id";
 

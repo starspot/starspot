@@ -138,6 +138,7 @@ class Application {
       })
       .catch((e: Error) => {
         response.statusCode = 500;
+        response.write(e.toString());
         response.write(e.stack);
         response.end();
       });

@@ -2,6 +2,7 @@
   "compilerOptions": {
     // Enhance Strictness
     "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
 

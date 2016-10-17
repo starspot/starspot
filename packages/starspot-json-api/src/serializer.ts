@@ -1,5 +1,6 @@
+import { dasherize, underscore} from "inflected";
+import { Reflector } from "starspot-core";
 import JSONAPI from "./json-api";
-import Reflector from "./reflector";
 import Resource from "./resource";
 import { Result, ResourceResult, ResourcesResult } from "./results";
 
@@ -9,8 +10,8 @@ interface Attributes {
 
 class Serializer {
   isCollection: boolean;
-  includedResources: Resource[] = [];
-  primaryResources: Resource[] = [];
+  includedResources: Resource<any>[] = [];
+  primaryResources: Resource<any>[] = [];
 
   serializeResults(results: Result[]) {
     this.processResults(results);
@@ -73,7 +74,8 @@ function serializeModel(model: any): JSONAPI.ResourceObject  {
 
   for (let attribute of reflector.getAttributes(model)) {
     let attrValue = reflector.getAttribute(model, attribute);
-    attributes[attribute] = attrValue === undefined ? null : reflector.getAttribute(model, attribute);
+    let attrName = dasherizeAttribute(attribute);
+    attributes[attrName] = attrValue === undefined ? null : reflector.getAttribute(model, attribute);
   }
 
   return {
@@ -81,6 +83,10 @@ function serializeModel(model: any): JSONAPI.ResourceObject  {
     type: reflector.getType(model),
     attributes: attributes
   };
+}
+
+function dasherizeAttribute(attribute: string): string {
+  return dasherize(underscore(attribute));
 }
 
 export default Serializer;
