@@ -1,9 +1,8 @@
 import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
-import { Reflector } from "starspot-core";
 import ResourceController, { after } from "../src/resource-controller";
 import Resource, { writableAttributes } from "../src/resource";
-import Inflected = require("inflected");
+import Model from "./helpers/model";
 
 // http://jsonapi.org/format/1.1/#fetching
 describe("Fetching Data", function () {
@@ -140,50 +139,3 @@ function createJSONAPIRequest(method: string, url: string, json?: any) {
 
   return request;
 }
-
-class ModelReflector implements Reflector {
-  getType(model: any) {
-    return model._type;
-  }
-
-  getID(model: any) {
-    return model._id;
-  }
-
-  getAttributes(model: any) {
-    let verboten = ["_id", "_type"];
-    let attributes = Object.keys(model).filter(k => verboten.indexOf(k) < 0);
-
-    return attributes;
-  }
-
-  getAttribute(model: any, attribute: string) {
-    return model[attribute];
-  }
-
-  async validate() {
-    return true;
-  }
-}
-
-class Model {
-  _id: string;
-  _setType: string;
-
-  constructor(options: any) {
-    this._id = options.id;
-    delete options.id;
-
-    Object.assign(this, options);
-  }
-
-  set _type(type: string) {
-    this._setType = type;
-  }
-
-  get _type() {
-    return this._setType || Inflected.dasherize(this.constructor.name).toLowerCase();
-  }
-}
-
-Reflector.install(Model, new ModelReflector());
