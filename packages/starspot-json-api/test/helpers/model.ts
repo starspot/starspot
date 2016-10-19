@@ -1,11 +1,13 @@
-import { Reflector } from "starspot-core";
+import { Reflector, Model as CoreModel } from "starspot-core";
 import Inflected = require("inflected");
 
-export default class Model {
+export default class Model extends CoreModel {
   _id: string;
   _setType: string;
 
   constructor(options: any) {
+    super();
+
     this._id = options.id;
     delete options.id;
 

@@ -1,9 +1,11 @@
 import { expect } from "chai";
-import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import { Reflector } from "starspot-core";
 import ResourceController, { after } from "../src/resource-controller";
-import Resource, { attribute, writableAttributes, updatableAttributes, creatableAttributes } from "../src/resource";
-import Inflected = require("inflected");
+import Resource, { attribute, updatable, writableAttributes, updatableAttributes, creatableAttributes } from "../src/resource";
+import JSONAPI from "../src/json-api";
+
+import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
+import Model from "./helpers/model";
 
 // http://jsonapi.org/format/1.1/#fetching
 describe("Fetching Data", function () {
@@ -11,15 +13,21 @@ describe("Fetching Data", function () {
   @writableAttributes("isWritable")
   @creatableAttributes("isCreatable")
   @updatableAttributes("isUpdatable")
-  class PhotoResource extends Resource<any> {
+  class PhotoResource extends Resource<Photo> {
     @attribute
+    @updatable
     title: string;
 
     @attribute
+    @updatable
     src: string;
 
-    static async update(model: Model, options: Resource.UpdateOptions) {
-      Object.assign(model, options.attributes);
+    static async findByID(id: JSONAPI.ID) {
+      return new Photo({ id });
+    }
+
+    async updateAttributes(attributes: Resource.Attributes) {
+      Object.assign(this.model, attributes);
     }
   }
 
@@ -49,14 +57,13 @@ describe("Fetching Data", function () {
       let response = createResponse();
       let request = createJSONAPIRequest("PATCH", "/photos/123", {
         "data": {
-          "id": "123",
+          "id": "1234",
           "type": "photos",
           "attributes": {
             "title": "Ember Hamster",
             "src": "http://example.com/images/productivity.png",
-            "isWritable": true,
-            "isUpdatable": true,
-            "isCreatable": true
+            "is-writable": true,
+            "is-updatable": true
           }
         }
       });
@@ -72,8 +79,11 @@ describe("Fetching Data", function () {
           "id": "1234",
           "attributes": {
             "title": "Ember Hamster",
-            "src": "http://example.com/images/productivity.png"
-          },
+            "src": "http://example.com/images/productivity.png",
+            "is-writable": true,
+            "is-updatable": true,
+            "is-creatable": null
+          }
         }
       });
 
@@ -110,26 +120,6 @@ class ModelReflector implements Reflector {
 
   async validate() {
     return true;
-  }
-}
-
-class Model {
-  _id: string;
-  _setType: string;
-
-  constructor(options: any) {
-    this._id = options.id;
-    delete options.id;
-
-    Object.assign(this, options);
-  }
-
-  set _type(type: string) {
-    this._setType = type;
-  }
-
-  get _type() {
-    return this._setType || Inflected.dasherize(this.constructor.name).toLowerCase();
   }
 }
 

@@ -13,7 +13,9 @@ export interface OperationOptions {
   target?: CallbackTarget;
 }
 
-export type ResourceClass = typeof Resource;
+export interface ResourceFactory {
+  new (): Resource<any>;
+}
 
 abstract class Operation {
   constructor(options: OperationOptions) {
@@ -23,14 +25,14 @@ abstract class Operation {
   container: Container;
   target: CallbackTarget;
 
-  resourceName: string;
+  type: string;
   resource?: Resource<any>;
   resources?: Resource<any>;
 
   abstract async process(): Promise<any>;
 
-  protected findResource(): ResourceClass {
-    let name = Inflected.singularize(this.resourceName);
+  protected findResource(): ResourceFactory & typeof Resource {
+    let name = Inflected.singularize(this.type);
     return this.container.findFactory("resource", name);
   }
 }
