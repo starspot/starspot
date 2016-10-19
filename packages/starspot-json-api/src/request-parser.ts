@@ -7,6 +7,7 @@ import JSONAPI from "./json-api";
 import Operation, { OperationOptions, CallbackTarget } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
 import CreateResourceOperation from "./operations/create-resource";
+import UpdateResourceOperation from "./operations/update-resource";
 
 import UnhandledActionError from "./errors/unhandled-action-error";
 import { ResourceTypeMismatch } from "./exceptions";
@@ -57,6 +58,9 @@ export default class RequestParser {
       case "create":
         this.processCreate();
         break;
+      case "update":
+        this.processUpdate();
+        break;
       default:
         throw new UnhandledActionError();
     }
@@ -66,7 +70,7 @@ export default class RequestParser {
 
   processIndex() {
     this.op(GetResourcesOperation, {
-      resourceName: this.params.controllerName
+      type: this.params.controllerName
     });
   }
 
@@ -80,8 +84,25 @@ export default class RequestParser {
     }
 
     this.op(CreateResourceOperation, {
+      id,
+      type,
+      attributes
+    });
+  }
+
+  processUpdate() {
+    let data = this.json.data as JSONAPI.ResourceObject;
+    let { type, id, attributes } = data;
+    let controllerType = this.params.controllerName;
+
+    if (!typesMatch(type, controllerType)) {
+      throw new ResourceTypeMismatch(type, controllerType);
+    }
+
+    this.op(UpdateResourceOperation, {
       resourceName: this.params.controllerName,
       id,
+      type,
       attributes
     });
   }

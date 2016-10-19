@@ -48,8 +48,11 @@ class Resource<T extends Model> {
     }
   }
 
-  static async findAll?(): Promise<any[]>;
-  static async create?(options: Resource.CreateOptions): Promise<any>;
+  async updateAttributes?(attributes: Resource.Attributes): Promise<void>;
+
+  static async findByID?(id: JSONAPI.ID): Promise<Model>;
+  static async findAll?(): Promise<Model[]>;
+  static async create?(options: Resource.CreateOptions): Promise<Model>;
 }
 
 function merge(target: any, ...sources: any[]) {
@@ -93,6 +96,10 @@ export default Resource;
 namespace Resource {
   export interface CreateOptions {
     attributes: JSONAPI.AttributesObject;
+  }
+
+  export interface Attributes {
+    [attr: string]: any;
   }
 }
 
@@ -139,6 +146,14 @@ export function writable(resource: Resource<any>, attribute: string) {
   descriptorFor(resource, attribute).writable = true;
 }
 
+export function updatable(resource: Resource<any>, attribute: string) {
+  descriptorFor(resource, attribute).updatable = true;
+}
+
+export function creatable(resource: Resource<any>, attribute: string) {
+  descriptorFor(resource, attribute).creatable = true;
+}
+
 export function readOnly(resource: Resource<any>, attribute: string) {
   descriptorFor(resource, attribute).writable = false;
 }
@@ -147,17 +162,26 @@ export function readOnly(resource: Resource<any>, attribute: string) {
  * Class Decorators
  */
 export function attributes(...attributes: string[]) {
-  return function(resourceConstructor: typeof Resource) {
-    for (let i = 0; i < attributes.length; i++) {
-      descriptorFor(resourceConstructor, attributes[i]);
-    }
-  };
+  return createAttributes(attributes);
 }
 
 export function writableAttributes(...attributes: string[]) {
+  return createAttributes(attributes, "writable");
+}
+
+export function updatableAttributes(...attributes: string[]) {
+  return createAttributes(attributes, "updatable");
+}
+
+export function creatableAttributes(...attributes: string[]) {
+  return createAttributes(attributes, "creatable");
+}
+
+function createAttributes(attributes: string[], flag?: string) {
   return function(resourceConstructor: typeof Resource) {
     for (let i = 0; i < attributes.length; i++) {
-      descriptorFor(resourceConstructor, attributes[i]).writable = true;
+      let desc = descriptorFor(resourceConstructor, attributes[i]);
+      if (flag) { desc[flag] = true; }
     }
   };
 }

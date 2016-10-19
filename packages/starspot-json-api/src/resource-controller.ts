@@ -13,6 +13,10 @@ export default class ResourceController extends Controller {
     return this.processRequest(params);
   }
 
+  async update(params: Controller.Parameters) {
+    return this.processRequest(params);
+  }
+
   invokeCallback(event: string, ...args: any[]) {
     let callbacks = callbacksFor(this, event);
     for (let i = 0; i < callbacks.length; i++) {
