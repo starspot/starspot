@@ -1,3 +1,4 @@
+import { camelize, underscore } from "inflected";
 import Operation from "../operation";
 import { ResourceResult } from "../results";
 import JSONAPI from "../json-api";
@@ -14,7 +15,7 @@ export default class CreateResourceOperation extends Operation {
 
     let Resource = this.findResource();
     let model = await Resource.create({
-      attributes: this.attributes
+      attributes: camelizeKeys(this.attributes)
     });
 
     this.target.invokeCallback("create", model);
@@ -24,4 +25,14 @@ export default class CreateResourceOperation extends Operation {
 
     return new ResourceResult(resource, isValid ? 201: 422);
   }
+}
+
+function camelizeKeys(obj: any): JSONAPI.AttributesObject {
+  let camelized = {};
+
+  for (let attr of Object.keys(obj)) {
+    camelized[camelize(underscore(attr), false)] = obj[attr];
+  }
+
+  return camelized;
 }
