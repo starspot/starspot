@@ -65,9 +65,9 @@ class Resource<T extends Model> {
 
   async updateAttributes?(attributes: Resource.Attributes): Promise<void>;
   async findByID?(id: JSONAPI.ID): Promise<Model>;
+  async create?(options: Resource.CreateOptions): Promise<Model>;
 
   static async findAll?(): Promise<Model[]>;
-  static async create?(options: Resource.CreateOptions): Promise<Model>;
 }
 
 function merge(target: any, ...sources: any[]) {

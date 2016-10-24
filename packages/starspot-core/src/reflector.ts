@@ -40,11 +40,17 @@ namespace Reflector {
   export class HasOneRelationship extends Relationship {
     relationshipType: RelationshipType = "hasOne";
     id: string;
+    valueFunc: Function;
 
-    constructor(type: string, id: string) {
+    get value() {
+      return Promise.resolve(this.valueFunc());
+    }
+
+    constructor(type: string, id: string, valueFunc: Function) {
       super();
       this.type = type;
       this.id = id;
+      this.valueFunc = valueFunc;
     }
   }
 

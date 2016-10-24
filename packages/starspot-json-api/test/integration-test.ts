@@ -19,14 +19,22 @@ describe("Fetching Data", function () {
             _type: "articles",
             _id: 1,
             title: "JSON API paints my bikeshed!",
-            authorId: 9
+            authorRelationship: {
+              _id: 9,
+              _type: "authors",
+              firstName: "Hassan"
+            }
           }), new Model({
             _type: "articles",
             _id: 2,
             title: "Rails is Omakase",
-            authorId: null
+            authorRelationship: null
           })];
         }
+      }
+
+      @attributes("firstName")
+      class AuthorResource extends Resource<any> {
       }
 
       let app = await createApplication()
@@ -37,6 +45,7 @@ describe("Fetching Data", function () {
 
         })
         .register("resource", "article", ArticleResource)
+        .register("resource", "author", AuthorResource)
         .boot();
 
       let request = createJSONAPIRequest("GET", "/articles");
@@ -54,7 +63,7 @@ describe("Fetching Data", function () {
       // collection with an array of resource objects or an empty array ([]) as
       // the response document’s primary data.
       expect(response.toJSON()).to.deep.equal({
-        data: [{
+        "data": [{
           "type": "articles",
           "id": "1",
           "attributes": {
@@ -78,6 +87,13 @@ describe("Fetching Data", function () {
             "author": {
               "data": null
             }
+          }
+        }],
+        "included": [{
+          type: "authors",
+          "id": "9",
+          "attributes": {
+            "first-name": "Hassan"
           }
         }]
       });

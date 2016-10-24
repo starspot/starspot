@@ -4,7 +4,7 @@ import Resource from "./resource";
 import { Container } from "starspot-core";
 
 export interface CallbackTarget {
-  invokeCallback(name: string, ...args: any[]): void;
+  invokeCallback(name: string, ...args: any[]): Promise<void>;
 }
 
 export interface OperationOptions {

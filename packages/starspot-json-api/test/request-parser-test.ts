@@ -25,7 +25,7 @@ describe("Request Parser", function() {
 });
 
 class Target {
-  invokeCallback() { }
+  async invokeCallback() { }
 }
 
 class PhotoResource {

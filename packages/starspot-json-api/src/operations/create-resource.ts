@@ -14,11 +14,11 @@ export default class CreateResourceOperation extends Operation {
     }
 
     let Resource = this.findResource();
-    let model = await Resource.create({
+    let model = await (new Resource()).create({
       attributes: camelizeKeys(this.attributes)
     });
 
-    this.target.invokeCallback("create", model);
+    await this.target.invokeCallback("create", model);
 
     let resource = new Resource(model);
     let isValid = await resource.validate();

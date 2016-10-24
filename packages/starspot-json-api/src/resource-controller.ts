@@ -17,11 +17,11 @@ export default class ResourceController extends Controller {
     return this.processRequest(params);
   }
 
-  invokeCallback(event: string, ...args: any[]) {
+  async invokeCallback(event: string, ...args: any[]) {
     let callbacks = callbacksFor(this, event);
     for (let i = 0; i < callbacks.length; i++) {
       let method = this[callbacks[i]] as Function;
-      method.apply(this, args); 
+      await method.apply(this, args); 
     }
   }
 
@@ -41,7 +41,8 @@ export default class ResourceController extends Controller {
       }
 
       let serializer = new Serializer();
-      let { json, statusCode } = serializer.serializeResults(results);
+      serializer.container = Container.containerFor(this);
+      let { json, statusCode } = await serializer.serializeResults(results);
       response.statusCode = statusCode;
 
       return json;
