@@ -203,14 +203,15 @@ class Container {
       }
     });
 
-    let resolver = this;
+    let container = this;
 
     let injectedFactory = function() {
       let instance = new factory(...arguments);
+      container.brandInstance(instance, name);
 
       injections.forEach((injection) => {
         let [injectionType, injectionName] = injection.with;
-        instance[injection.as] = resolver.findInstance(injectionType, injectionName);
+        instance[injection.as] = container.findInstance(injectionType, injectionName);
       });
 
       return instance;
