@@ -9,10 +9,10 @@ class Application {
   public container: Container;
   public ui: UI;
 
-  protected initializers: Application.Initializer[];
-  protected env: Environment;
+  initializers: Application.Initializer[];
+  env: Environment;
 
-  private _rootPath: string;
+  _rootPath: string;
 
   constructor(options: Application.ConstructorOptions = {}) {
     this.ui = options.ui || new UI();

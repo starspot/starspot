@@ -2,15 +2,15 @@ import Environment from "./environment";
 import UI from "./ui";
 import Resolver from "./resolver";
 
-interface Cache {
+export interface Cache {
   [key: string]: TypeCache;
 }
 
-interface TypeCache {
+export interface TypeCache {
   [key: string]: any;
 }
 
-interface FileMap {
+export interface FileMap {
   [key: string]: [string, Key];
 }
 
@@ -44,16 +44,16 @@ export interface ConstructorOptions {
 class Container {
   public resolver: Resolver;
 
-  private ui: UI;
-  private env: Environment;
+  ui: UI;
+  env: Environment;
 
-  private factoryCache: Cache = { };
-  private instanceCache: Cache = { };
-  private moduleCache: Cache = { };
+  factoryCache: Cache = { };
+  instanceCache: Cache = { };
+  moduleCache: Cache = { };
 
-  private factoryRegistrations: Cache = { };
-  private injectionsMap: Cache = { };
-  private fileMap: FileMap = { };
+  factoryRegistrations: Cache = { };
+  injectionsMap: Cache = { };
+  fileMap: FileMap = { };
 
   constructor(options: ConstructorOptions = {}) {
     let rootPath = options.rootPath;
