@@ -14,7 +14,7 @@ interface Controller {
 class Controller {
   createModel<T>(modelName: string): T {
     let container = Container.metaFor(this).container;
-    return container.findInstance("model", modelName);
+    return new (container.findFactory("model", modelName))();
   }
 }
 
