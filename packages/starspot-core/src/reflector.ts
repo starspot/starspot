@@ -15,6 +15,7 @@ interface Reflector {
   getAttributes(model: any): string[];
   getAttribute(model: any, attribute: string): any;
   getRelationships(model: any): string[];
+  getRelationship(model: any, attribute: string): Reflector.Relationship;
   validate?(model: any): Promise<boolean>;
 }
 
@@ -27,6 +28,28 @@ namespace Reflector {
 
   export function get(model: any) {
     return model[SYMBOL] as Reflector;
+  }
+
+  export type RelationshipType = "hasOne" | "hasMany";
+
+  export class Relationship {
+    relationshipType: RelationshipType;
+    type: string;
+  }
+
+  export class HasOneRelationship extends Relationship {
+    relationshipType: RelationshipType = "hasOne";
+    id: string;
+
+    constructor(type: string, id: string) {
+      super();
+      this.type = type;
+      this.id = id;
+    }
+  }
+
+  export class HasManyRelationship extends Relationship {
+    relationshipType: RelationshipType = "hasMany";
   }
 }
 

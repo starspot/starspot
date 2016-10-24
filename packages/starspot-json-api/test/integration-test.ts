@@ -63,7 +63,7 @@ describe("Fetching Data", function () {
           "relationships": {
             "author": {
               "data": {
-                "type": "people",
+                "type": "authors",
                 "id": "9"
               }
             }

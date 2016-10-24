@@ -48,6 +48,13 @@ class ModelReflector implements Reflector {
       .filter(k => k.substr(-2) != "Id");
   }
 
+  getRelationship(model: any, relationship: string) {
+    let hasOneKey = relationship + "Id";
+    if (model[hasOneKey]) {
+      return new Reflector.HasOneRelationship(relationship, model[hasOneKey]);
+    }
+  }
+
   async validate() {
     return true;
   }

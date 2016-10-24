@@ -68,8 +68,12 @@ class Container {
 
   static containerFor(instance: any): Container {
     let meta = Container.metaFor(instance);
-
     return (meta && meta.container) || null;
+  }
+
+  static nameFor(instance: any): string {
+    let meta = Container.metaFor(instance);
+    return (meta && meta.name) || null;
   }
 
   registerFactory(type: string, name: Key, factory: Factory): void {
@@ -201,7 +205,7 @@ class Container {
 
     let resolver = this;
 
-    return function() {
+    let injectedFactory = function() {
       let instance = new factory(...arguments);
 
       injections.forEach((injection) => {

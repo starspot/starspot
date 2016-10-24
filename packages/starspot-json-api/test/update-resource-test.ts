@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { Reflector } from "starspot-core";
 import ResourceController, { after } from "../src/resource-controller";
 import Resource, { attribute, updatable, writableAttributes, updatableAttributes, creatableAttributes } from "../src/resource";
 import JSONAPI from "../src/json-api";
@@ -97,35 +96,3 @@ function createJSONAPIRequest(method: string, url: string, json?: any) {
 
   return request;
 }
-
-class ModelReflector implements Reflector {
-  getType(model: any) {
-    return model._type;
-  }
-
-  getID(model: any) {
-    return model._id;
-  }
-
-  getAttributes(model: any) {
-    let verboten = ["_id", "_type"];
-    let attributes = Object.keys(model).filter(k => verboten.indexOf(k) < 0);
-
-    return attributes;
-  }
-
-  getAttribute(model: any, attribute: string) {
-    return model[attribute];
-  }
-
-  getRelationships(model: any) {
-    return this.getAttributes(model)
-      .filter(k => k.substr(-2) != "Id");
-  }
-
-  async validate() {
-    return true;
-  }
-}
-
-Reflector.install(Model, new ModelReflector());

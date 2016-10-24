@@ -106,6 +106,11 @@ class ResourceReflector implements Reflector {
   getRelationships(resource: Resource<any>) {
     return resource._relationshipsList;
   }
+
+  getRelationship(resource: Resource<any>, relationship: string) {
+    let model = resource.model;
+    return Reflector.get(model).getRelationship(model, relationship);
+  }
 }
 
 Reflector.install(Resource, new ResourceReflector());

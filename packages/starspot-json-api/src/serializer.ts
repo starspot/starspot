@@ -1,4 +1,4 @@
-import { dasherize, underscore} from "inflected";
+import { dasherize, underscore, pluralize } from "inflected";
 import { Reflector } from "starspot-core";
 import JSONAPI from "./json-api";
 import Resource from "./resource";
@@ -81,15 +81,34 @@ function serializeModel(model: any): JSONAPI.ResourceObject  {
 
   for (let relationship of reflector.getRelationships(model)) {
     let relationshipName = dasherizeAttribute(relationship);
-    relationships[relationshipName] = "hello world";
+    let relationshipValue = reflector.getRelationship(model, relationship);
+    relationships[relationshipName] = serializeRelationship(relationshipValue);
   }
 
   return {
-    id: reflector.getID(model)+"",
+    id: reflector.getID(model) + "",
     type: reflector.getType(model),
     attributes,
     relationships
   };
+}
+
+function serializeRelationship(relationship: Reflector.Relationship) {
+  let data = null;
+
+  if (relationship instanceof Reflector.HasOneRelationship) {
+    let { id, type } = relationship;
+    id = id + "";
+
+    if (id) {
+      type = pluralize(type);
+      data = { id, type };
+    }
+  }
+
+  return {
+    data
+  }
 }
 
 function dasherizeAttribute(attribute: string): string {
