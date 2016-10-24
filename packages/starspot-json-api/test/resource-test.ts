@@ -30,7 +30,7 @@ describe("Resource", function() {
       }
 
       let resource = new C();
-      expect(resource._attributesList.sort()).to.deep.equal([
+      expect(resource["@@attributesList"].sort()).to.deep.equal([
         "a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"
       ]);
 
@@ -55,8 +55,8 @@ describe("Resource", function() {
       let b = new B();
       let c = new C();
 
-      expect(b._attributes["a1"].writable).to.be.true;
-      expect(c._attributes["a1"].writable).to.be.false;
+      expect(b["@@fields"]["a1"].writable).to.be.true;
+      expect(c["@@fields"]["a1"].writable).to.be.false;
     });
 
   });

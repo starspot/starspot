@@ -67,6 +67,7 @@ class Serializer {
 function serializeModel(model: any): JSONAPI.ResourceObject  {
   let reflector = Reflector.get(model);
   let attributes: Attributes = {};
+  let relationships: Attributes = {};
 
   if (!reflector) {
     throw new Error("Can't serialize a model without a reflector installed.");
@@ -78,10 +79,16 @@ function serializeModel(model: any): JSONAPI.ResourceObject  {
     attributes[attrName] = attrValue === undefined ? null : reflector.getAttribute(model, attribute);
   }
 
+  for (let relationship of reflector.getRelationships(model)) {
+    let relationshipName = dasherizeAttribute(relationship);
+    relationships[relationshipName] = "hello world";
+  }
+
   return {
     id: reflector.getID(model)+"",
     type: reflector.getType(model),
-    attributes: attributes
+    attributes,
+    relationships
   };
 }
 

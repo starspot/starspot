@@ -118,6 +118,11 @@ class ModelReflector implements Reflector {
     return model[attribute];
   }
 
+  getRelationships(model: any) {
+    return this.getAttributes(model)
+      .filter(k => k.substr(-2) != "Id");
+  }
+
   async validate() {
     return true;
   }

@@ -211,6 +211,19 @@ class Container {
 
       return instance;
     };
+
+    // Copy any static methods and properties from the original factory.
+    for (let p of Object.getOwnPropertyNames(factory)) {
+      let desc = Object.getOwnPropertyDescriptor(factory, p);
+      if (!desc || desc.writable) {
+        injectedFactory[p] = factory[p];
+      }
+    }
+
+    this.brandInstance(injectedFactory, name);
+    injectedFactory.constructor = factory;
+
+    return injectedFactory;
   }
 }
 

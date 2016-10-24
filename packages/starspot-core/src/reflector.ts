@@ -14,6 +14,7 @@ interface Reflector {
   getID(model: any): string;
   getAttributes(model: any): string[];
   getAttribute(model: any, attribute: string): any;
+  getRelationships(model: any): string[];
   validate?(model: any): Promise<boolean>;
 }
 

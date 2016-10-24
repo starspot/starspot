@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import ResourceController, { after } from "../src/resource-controller";
-import Resource, { writableAttributes } from "../src/resource";
+import Resource, { attributes, hasOne, writableAttributes } from "../src/resource";
 import Model from "./helpers/model";
 
 // http://jsonapi.org/format/1.1/#fetching
@@ -11,17 +11,20 @@ describe("Fetching Data", function () {
   describe("Fetching Resources", function () {
 
     it("generates index documents", async function () {
-      @writableAttributes("title")
+      @attributes("title")
+      @hasOne("author")
       class ArticleResource extends Resource<any> {
         static async findAll() {
           return [new Model({
             _type: "articles",
             _id: 1,
-            title: "JSON API paints my bikeshed!"
+            title: "JSON API paints my bikeshed!",
+            authorId: 9
           }), new Model({
             _type: "articles",
             _id: 2,
-            title: "Rails is Omakase"
+            title: "Rails is Omakase",
+            authorId: null
           })];
         }
       }
@@ -56,12 +59,25 @@ describe("Fetching Data", function () {
           "id": "1",
           "attributes": {
             "title": "JSON API paints my bikeshed!"
-          }
+          },
+          "relationships": {
+            "author": {
+              "data": {
+                "type": "people",
+                "id": "9"
+              }
+            }
+          },
         }, {
           "type": "articles",
           "id": "2",
           "attributes": {
             "title": "Rails is Omakase"
+          },
+          "relationships": {
+            "author": {
+              "data": null
+            }
           }
         }]
       });
