@@ -25,15 +25,30 @@ import Inflected = require("inflected");
 class Resource<T extends Model> {
   model: T;
 
-  static _attributes: AttributeDescriptors;
-  _attributes: AttributeDescriptors;
+  static "@@fields": Descriptors;
+  "@@fields": Descriptors;
   _attributesList: string[];
+  _relationshipsList: string[];
 
   // TypeScript can't infer constructor property for some reason.
   ["constructor"]: typeof Resource;
   constructor(model?: T) {
-    this._attributes = merge({}, this._attributes, this.constructor._attributes);
-    this._attributesList = Object.keys(this._attributes);
+    let fields = this["@@fields"] = merge({}, this["@@fields"], this.constructor["@@fields"]);
+    let relationships: string[] = [];
+    let attributes: string[] = [];
+
+    let fieldKeys = Object.keys(fields);
+    for (let i = 0; i < fieldKeys.length; i++) {
+      let key = fieldKeys[i];
+      if (fields[key] instanceof AttributeDescriptor) {
+        attributes.push(key);
+      } else {
+        relationships.push(key);
+      }
+    }
+
+    this._attributesList = attributes;
+    this._relationshipsList = relationships;
 
     this.model = model;
   }
@@ -49,10 +64,11 @@ class Resource<T extends Model> {
   }
 
   async updateAttributes?(attributes: Resource.Attributes): Promise<void>;
+  async findByID?(id: JSONAPI.ID): Promise<Model>;
+  async create?(options: Resource.CreateOptions): Promise<Model>;
+  async save?(): Promise<Model>;
 
-  static async findByID?(id: JSONAPI.ID): Promise<Model>;
   static async findAll?(): Promise<Model[]>;
-  static async create?(options: Resource.CreateOptions): Promise<Model>;
 }
 
 function merge(target: any, ...sources: any[]) {
@@ -87,6 +103,15 @@ class ResourceReflector implements Reflector {
     let model = resource.model;
     return Reflector.get(model).getAttribute(model, attribute);
   }
+
+  getRelationships(resource: Resource<any>) {
+    return resource._relationshipsList;
+  }
+
+  getRelationship(resource: Resource<any>, relationship: string) {
+    let model = resource.model;
+    return Reflector.get(model).getRelationship(model, relationship);
+  }
 }
 
 Reflector.install(Resource, new ResourceReflector());
@@ -103,7 +128,7 @@ namespace Resource {
   }
 }
 
-export class AttributeDescriptor {
+export class Descriptor {
   constructor(public name: string) {
   }
 
@@ -119,43 +144,52 @@ export class AttributeDescriptor {
     this.creatable = writable;
   }
 
-  clone() {
-    let desc = new AttributeDescriptor(this.name);
+  clone(): Descriptor {
+    let desc = new (<any>this.constructor)(this.name);
     desc.updatable = this.updatable;
     desc.creatable = this.creatable;
     return desc;
   }
 }
 
-export interface AttributeDescriptors {
-  [attr: string]: AttributeDescriptor
+export class AttributeDescriptor extends Descriptor {
 }
 
-interface Attributable {
-  _attributes: AttributeDescriptors
+export type RelationshipType = "hasOne" | "hasMany";
+
+export class RelationshipDescriptor extends Descriptor {
+  type: RelationshipType;
+}
+
+export interface Descriptors {
+  [attr: string]: Descriptor
+}
+
+interface HasFields {
+  "@@fields": Descriptors
 }
 
 /*
  * Property Decorators
  */
 export function attribute(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute);
+  descriptorFor(resource, attribute, AttributeDescriptor);
 }
 
 export function writable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute).writable = true;
+  descriptorFor(resource, attribute, AttributeDescriptor).writable = true;
 }
 
 export function updatable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute).updatable = true;
+  descriptorFor(resource, attribute, AttributeDescriptor).updatable = true;
 }
 
 export function creatable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute).creatable = true;
+  descriptorFor(resource, attribute, AttributeDescriptor).creatable = true;
 }
 
 export function readOnly(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute).writable = false;
+  descriptorFor(resource, attribute, AttributeDescriptor).writable = false;
 }
 
 /*
@@ -180,37 +214,44 @@ export function creatableAttributes(...attributes: string[]) {
 function createAttributes(attributes: string[], flag?: string) {
   return function(resourceConstructor: typeof Resource) {
     for (let i = 0; i < attributes.length; i++) {
-      let desc = descriptorFor(resourceConstructor, attributes[i]);
+      let desc = descriptorFor(resourceConstructor, attributes[i], AttributeDescriptor);
       if (flag) { desc[flag] = true; }
     }
   };
 }
 
+export function hasOne(relationship: string) {
+  return function(resourceConstructor: typeof Resource) {
+    let desc = descriptorFor(resourceConstructor, relationship, RelationshipDescriptor);
+    desc.type = "hasOne";
+  };
+}
+
 const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 /**
  * Retrieves the attribute descriptor for the named attribute, creating a new
  * descriptor if none already exists.
  */
-function descriptorFor(proto: Attributable, name: string) {
-  let attributes = attributesFor(proto);
-
-  let desc = attributes[name];
+function descriptorFor<T extends Descriptor>(proto: HasFields, name: string, DescriptorClass: { new(...args: any[]): T }): T {
+  let fields = fieldsFor(proto);
+  let desc = fields[name];
 
   if (!desc) {
-    desc = attributes[name] = new AttributeDescriptor(name);
-  } else if (!hasOwnProperty.call(attributes, name)) {
-    desc = attributes[name] = desc.clone();
+    desc = fields[name] = new DescriptorClass(name);
+  } else if (!hasOwnProperty.call(fields, name)) {
+    desc = fields[name] = desc.clone();
   }
 
-  return desc;
+  return desc as T;
 }
 
-function attributesFor(proto: Attributable) {
-  let attributes = proto._attributes;
+function fieldsFor(proto: HasFields) {
+  let fields = proto["@@fields"];
 
-  if (!attributes || !proto.hasOwnProperty("_attributes")) {
-    attributes = proto._attributes = Object.create(attributes || null);
+  if (!fields || !proto.hasOwnProperty("@@fields")) {
+    fields = proto["@@fields"] = Object.create(fields || null);
   }
 
-  return attributes;
+  return fields;
 }

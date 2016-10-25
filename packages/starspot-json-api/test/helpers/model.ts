@@ -43,6 +43,23 @@ class ModelReflector implements Reflector {
     return model[attribute];
   }
 
+  getRelationships(model: any) {
+    return this.getAttributes(model)
+      .filter(k => k.substr(-12) != "Relationship")
+      .map(k => k.substr(0, k.length - 12));
+  }
+
+  getRelationship(model: any, relationship: string) {
+    let hasOneKey = relationship + "Relationship";
+    if (hasOneKey in model) {
+      let id = (model[hasOneKey] && model[hasOneKey]._id) || null;
+
+      return new Reflector.HasOneRelationship(relationship, id, () => {
+        return new Model(model[hasOneKey]);
+      });
+    }
+  }
+
   async validate() {
     return true;
   }

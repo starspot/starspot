@@ -2,15 +2,15 @@ import Environment from "./environment";
 import UI from "./ui";
 import Resolver from "./resolver";
 
-interface Cache {
+export interface Cache {
   [key: string]: TypeCache;
 }
 
-interface TypeCache {
+export interface TypeCache {
   [key: string]: any;
 }
 
-interface FileMap {
+export interface FileMap {
   [key: string]: [string, Key];
 }
 
@@ -44,16 +44,16 @@ export interface ConstructorOptions {
 class Container {
   public resolver: Resolver;
 
-  private ui: UI;
-  private env: Environment;
+  ui: UI;
+  env: Environment;
 
-  private factoryCache: Cache = { };
-  private instanceCache: Cache = { };
-  private moduleCache: Cache = { };
+  factoryCache: Cache = { };
+  instanceCache: Cache = { };
+  moduleCache: Cache = { };
 
-  private factoryRegistrations: Cache = { };
-  private injectionsMap: Cache = { };
-  private fileMap: FileMap = { };
+  factoryRegistrations: Cache = { };
+  injectionsMap: Cache = { };
+  fileMap: FileMap = { };
 
   constructor(options: ConstructorOptions = {}) {
     let rootPath = options.rootPath;
@@ -68,8 +68,12 @@ class Container {
 
   static containerFor(instance: any): Container {
     let meta = Container.metaFor(instance);
-
     return (meta && meta.container) || null;
+  }
+
+  static nameFor(instance: any): string {
+    let meta = Container.metaFor(instance);
+    return (meta && meta.name) || null;
   }
 
   registerFactory(type: string, name: Key, factory: Factory): void {
@@ -199,18 +203,32 @@ class Container {
       }
     });
 
-    let resolver = this;
+    let container = this;
 
-    return function() {
+    let injectedFactory = function() {
       let instance = new factory(...arguments);
+      container.brandInstance(instance, name);
 
       injections.forEach((injection) => {
         let [injectionType, injectionName] = injection.with;
-        instance[injection.as] = resolver.findInstance(injectionType, injectionName);
+        instance[injection.as] = container.findInstance(injectionType, injectionName);
       });
 
       return instance;
     };
+
+    // Copy any static methods and properties from the original factory.
+    for (let p of Object.getOwnPropertyNames(factory)) {
+      let desc = Object.getOwnPropertyDescriptor(factory, p);
+      if (!desc || desc.writable) {
+        injectedFactory[p] = factory[p];
+      }
+    }
+
+    this.brandInstance(injectedFactory, name);
+    injectedFactory.constructor = factory;
+
+    return injectedFactory;
   }
 }
 

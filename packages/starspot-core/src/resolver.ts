@@ -51,14 +51,14 @@ export interface ConstructorOptions {
 }
 
 export default class Resolver {
-  public mappers = [MAIN_MODULES, RESOURCE_MODULES, CROSSCUTTING_MODULES];
-  public perTypeMappers: Dict<PathMapper[]> = {
+  mappers = [MAIN_MODULES, RESOURCE_MODULES, CROSSCUTTING_MODULES];
+  perTypeMappers: Dict<PathMapper[]> = {
     config: [CONFIG_MODULES]
   };
-  public rootPath: string;
+  rootPath: string;
 
-  private ui: UI;
-  private env: Environment;
+  ui: UI;
+  env: Environment;
 
   constructor(options: ConstructorOptions = {}) {
     this.env = options.env || new Environment();

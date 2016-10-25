@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import ResourceController, { after } from "../src/resource-controller";
-import Resource, { writableAttributes } from "../src/resource";
+import Resource, { attributes, hasOne, writableAttributes } from "../src/resource";
 import Model from "./helpers/model";
 
 // http://jsonapi.org/format/1.1/#fetching
@@ -11,19 +11,30 @@ describe("Fetching Data", function () {
   describe("Fetching Resources", function () {
 
     it("generates index documents", async function () {
-      @writableAttributes("title")
+      @attributes("title")
+      @hasOne("author")
       class ArticleResource extends Resource<any> {
         static async findAll() {
           return [new Model({
             _type: "articles",
             _id: 1,
-            title: "JSON API paints my bikeshed!"
+            title: "JSON API paints my bikeshed!",
+            authorRelationship: {
+              _id: 9,
+              _type: "authors",
+              firstName: "Hassan"
+            }
           }), new Model({
             _type: "articles",
             _id: 2,
-            title: "Rails is Omakase"
+            title: "Rails is Omakase",
+            authorRelationship: null
           })];
         }
+      }
+
+      @attributes("firstName")
+      class AuthorResource extends Resource<any> {
       }
 
       let app = await createApplication()
@@ -34,6 +45,7 @@ describe("Fetching Data", function () {
 
         })
         .register("resource", "article", ArticleResource)
+        .register("resource", "author", AuthorResource)
         .boot();
 
       let request = createJSONAPIRequest("GET", "/articles");
@@ -51,17 +63,37 @@ describe("Fetching Data", function () {
       // collection with an array of resource objects or an empty array ([]) as
       // the response document’s primary data.
       expect(response.toJSON()).to.deep.equal({
-        data: [{
+        "data": [{
           "type": "articles",
           "id": "1",
           "attributes": {
             "title": "JSON API paints my bikeshed!"
-          }
+          },
+          "relationships": {
+            "author": {
+              "data": {
+                "type": "authors",
+                "id": "9"
+              }
+            }
+          },
         }, {
           "type": "articles",
           "id": "2",
           "attributes": {
             "title": "Rails is Omakase"
+          },
+          "relationships": {
+            "author": {
+              "data": null
+            }
+          }
+        }],
+        "included": [{
+          type: "authors",
+          "id": "9",
+          "attributes": {
+            "first-name": "Hassan"
           }
         }]
       });
@@ -76,12 +108,16 @@ describe("Fetching Data", function () {
 
       @writableAttributes("title", "src")
       class PhotoResource extends Resource<any> {
-        static async create(options: Resource.CreateOptions) {
+        async create(options: Resource.CreateOptions) {
           let newAttrs = Object.assign({
             id: "1234"
           }, options.attributes);
 
           return new Photo(newAttrs);
+        }
+
+        async save() {
+          return this.model;
         }
       }
 

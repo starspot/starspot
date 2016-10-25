@@ -17,7 +17,7 @@ const COLORS: { [index: string]: [Function, Function]} = {
 };
 
 class UI extends BaseUI {
-  private lastCategory: UI.Category = null;
+  lastCategory: UI.Category = null;
 
   askOne(event: UI.Event) {
     event.category = event.category || "prompt";

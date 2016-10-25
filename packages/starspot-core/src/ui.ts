@@ -1,11 +1,11 @@
 import { inspect } from "util";
 
 class UI {
-  protected logLevel = UI.LogLevel.Info;
+  logLevel = UI.LogLevel.Info;
 
-  private inputStream: NodeJS.ReadableStream;
-  private outputStream: NodeJS.WritableStream;
-  private errorStream: NodeJS.WritableStream;
+  inputStream: NodeJS.ReadableStream;
+  outputStream: NodeJS.WritableStream;
+  errorStream: NodeJS.WritableStream;
 
   constructor(options: UI.ConstructorOptions = {}) {
     this.inputStream = options.inputStream || process.stdin;
