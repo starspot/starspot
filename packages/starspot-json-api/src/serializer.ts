@@ -76,7 +76,7 @@ class Serializer {
   }
 
   async serializeMany(models: any[], included: Included): Promise<JSONAPI.DataDocument> {
-    let data = [];
+    let data: JSONAPI.PrimaryData = [];
 
     for (let i = 0; i < models.length; i++) {
       let model = models[i];
@@ -101,7 +101,7 @@ export class Included {
     let id = reflector.getID(model);
 
     let idMap = this.seen.get(type);
-    
+
     if (!idMap) {
       idMap = new Map<string, any>();
       this.seen.set(type, idMap);

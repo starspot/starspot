@@ -49,7 +49,7 @@ namespace Reflector {
     constructor(type: string, id: string, valueFunc: Function) {
       super();
       this.type = type;
-      this.id = id;
+      this.id = id != null ? id : null;
       this.valueFunc = valueFunc;
     }
   }
