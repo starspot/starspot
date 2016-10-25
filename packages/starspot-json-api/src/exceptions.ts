@@ -1,5 +1,5 @@
 export class JSONAPIError extends Error {
-  statusCode: number;
+  statusCode: number = 500;
 }
 
 export class InvalidDataFormat extends JSONAPIError {
