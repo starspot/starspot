@@ -3,6 +3,7 @@ import RequestParser from "./request-parser";
 import Serializer from "./serializer";
 import { Result } from "./results";
 import JSONAPI from "./json-api";
+import { JSONAPIError } from "./exceptions";
 
 export default class ResourceController extends Controller {
   async index(params: Controller.Parameters) {
@@ -47,9 +48,18 @@ export default class ResourceController extends Controller {
 
       return json;
     } catch (e) {
-      console.log("ERROR");
-      console.log(e);
-      throw e;
+      if (e instanceof JSONAPIError) {
+        let response = params.response;
+        response.statusCode = e.statusCode;
+        let errors = [e.message];
+        params.response.write(JSON.stringify({
+          errors
+        }));
+      } else {
+        console.log("ERROR");
+        console.log(e);
+        throw e;
+      }
     }
   }
 }
