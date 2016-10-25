@@ -167,7 +167,7 @@ async function serializeModel(model: any, included: Included): Promise<JSONAPI.R
 }
 
 function serializeRelationship(relationship: Reflector.Relationship) {
-  let data = null;
+  let data: JSONAPI.RelationshipObject = null;
 
   if (relationship instanceof Reflector.HasOneRelationship) {
     let { id, type } = relationship;
