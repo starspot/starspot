@@ -115,6 +115,10 @@ describe("Fetching Data", function () {
 
           return new Photo(newAttrs);
         }
+
+        async save() {
+          return this.model;
+        }
       }
 
       let didCreateWasCalled = false;
