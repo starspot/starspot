@@ -1,6 +1,6 @@
 import Environment from "./environment";
 import UI from "./ui";
-import Resolver from "./resolver";
+import Resolver, { Resolution } from "./resolver";
 
 export interface Cache {
   [key: string]: TypeCache;
@@ -22,11 +22,15 @@ export interface Factory {
 
 export type Entity = [string, Key];
 
+export type InjectionTargetType = "factories" | "instances";
+
 export interface InjectionOptions {
   /** The resolver type and name to inject into */
   with: Entity;
   /** Set the injected value to this property name */
   as: string;
+  /** What type of objects this injection should be applied to. Can be either "factories" or "instances". */
+  on?: InjectionTargetType;
 
   /** Optional name for this injection used for debugging */
   annotation?: string;
@@ -34,15 +38,20 @@ export interface InjectionOptions {
 
 const ALL = Symbol("all");
 
+export interface Resolvable {
+  resolve<T>([type, name]: [string, Key]): Resolution<T>;
+  invalidateCache(path: string): void;
+}
+
 export interface ConstructorOptions {
   rootPath?: string;
-  resolver?: Resolver;
+  resolver?: Resolvable;
   env?: Environment;
   ui?: UI;
 }
 
 class Container {
-  public resolver: Resolver;
+  public resolver: Resolvable;
 
   ui: UI;
   env: Environment;
@@ -53,6 +62,7 @@ class Container {
 
   factoryRegistrations: Cache = { };
   injectionsMap: Cache = { };
+  factoryInjectionsMap: Cache = { };
   fileMap: FileMap = { };
 
   constructor(options: ConstructorOptions = {}) {
@@ -82,7 +92,7 @@ class Container {
 
   registerInstance(type: string, name: Key, instance: any): void {
     cacheFor(this.instanceCache, type)[name] = instance;
-    this.brandInstance(instance, name);
+    this.brand(instance, name);
   }
 
   inject(target: Entity, options: InjectionOptions): void;
@@ -90,11 +100,13 @@ class Container {
   inject(target: any, options: InjectionOptions) {
     let injections: InjectionOptions[];
 
+    let isFactoryInjection = options.on === "factories";
+
     if (typeof target === "string") {
-      injections = this.injectionsFor(target);
+      injections = this.injectionsFor(target, ALL, isFactoryInjection);
     } else {
       let [type, name] = target;
-      injections = this.injectionsFor(type, name);
+      injections = this.injectionsFor(type, name, isFactoryInjection);
     }
 
     injections.push(options);
@@ -104,8 +116,11 @@ class Container {
     return this.findInstance("controller", controllerName);
   }
 
-  fileDidChange(path: string) {
-    path = path.split(".").slice(0, -1).join(".");
+  fileDidChange(fullPath: string) {
+    // Strip off the file extension; this is done so that e.g. a .ts file or a
+    // .js file changing will invalidate the same module, since we don't know in
+    // what order the require hooks will load things.
+    let path = stripFileExtension(fullPath);
     let fileInfo = this.fileMap[path];
     if (!fileInfo) { return; }
 
@@ -120,7 +135,7 @@ class Container {
     cache = cacheFor(this.moduleCache, type);
     cache[name] = null;
 
-    delete require.cache[require.resolve(path)];
+    this.resolver.invalidateCache(fullPath);
   }
 
   findModule(type: string, name: Key) {
@@ -132,6 +147,7 @@ class Container {
 
     let [mod, modulePath] = resolution;
 
+    modulePath = stripFileExtension(modulePath);
     this.fileMap[modulePath] = [type, name];
 
     return cache[name] = mod;
@@ -146,7 +162,7 @@ class Container {
     if (!Factory) { return null; }
 
     let instance = new Factory();
-    this.brandInstance(instance, name);
+    this.brand(instance, name);
 
     cache[name] = instance;
     return instance;
@@ -158,21 +174,22 @@ class Container {
 
     let registrations = cacheFor(this.factoryRegistrations, type);
     if (registrations[name]) {
-      return this.buildFactoryWithInjections(type, name, registrations[name]);
+      return cache[name] = this.buildFactory(type, name, registrations[name]);
     }
 
     let Factory = this.findModule(type, name);
     if (!Factory) { return null; }
 
-    return cache[name] = this.buildFactoryWithInjections(type, name, Factory);
+    return cache[name] = this.buildFactory(type, name, Factory);
   }
 
-  brandInstance(instance: any, name: Key) {
-    instance[Container.META] = { name, container: this };
+  brand(obj: any, name: Key) {
+    obj[Container.META] = { name, container: this };
   }
 
-  injectionsFor(type: string, name: Key = ALL): InjectionOptions[] {
-    let typeInjections = cacheFor(this.injectionsMap, type);
+  injectionsFor(type: string, name: Key, isFactoryInjection: boolean): InjectionOptions[] {
+    let injectionsMap = isFactoryInjection ? this.factoryInjectionsMap : this.injectionsMap;
+    let typeInjections = cacheFor(injectionsMap, type);
     let injections = typeInjections[name];
 
     if (!injections) {
@@ -182,20 +199,17 @@ class Container {
     return injections;
   }
 
-  buildFactoryWithInjections(type: string, name: Key, factory: Factory): any {
-    let injections = this.injectionsFor(type, name);
-    let typeInjections = this.injectionsFor(type);
+  findInjectionsFor(type: string, name: Key, factoryInjections: boolean): InjectionOptions[] {
+    let injections = this.injectionsFor(type, name, factoryInjections) || [];
+    let typeInjections = this.injectionsFor(type, ALL, factoryInjections) || [];
 
-    if (!injections && !typeInjections) { return factory; }
+    if (!injections.length && !typeInjections.length) {
+      return null;
+    }
 
-    injections = injections || [];
-    typeInjections = typeInjections || [];
+    let allInjections = injections.concat(typeInjections);
 
-    if (!injections.length && !typeInjections.length) { return factory; }
-
-    injections = injections.concat(typeInjections);
-
-    injections.filter(injection => {
+    allInjections.forEach(injection => {
       let [withType, withName] = injection.with;
       if (withType === type && withName === name) {
         let annotation = injection.annotation || "an injection";
@@ -203,33 +217,67 @@ class Container {
       }
     });
 
-    let container = this;
+    return allInjections;
+  }
 
-    let injectedFactory = function() {
-      let instance = new factory(...arguments);
-      container.brandInstance(instance, name);
+  buildFactory(type: string, name: Key, factory: Factory): any {
+    let instanceInjections = this.findInjectionsFor(type, name, false);
+    let injectedFactory: () => any;
 
-      injections.forEach((injection) => {
-        let [injectionType, injectionName] = injection.with;
-        instance[injection.as] = container.findInstance(injectionType, injectionName);
-      });
-
-      return instance;
-    };
-
-    // Copy any static methods and properties from the original factory.
-    for (let p of Object.getOwnPropertyNames(factory)) {
-      let desc = Object.getOwnPropertyDescriptor(factory, p);
-      if (!desc || desc.writable) {
-        injectedFactory[p] = factory[p];
-      }
+    if (!instanceInjections) {
+      injectedFactory = buildFactory(this, name, factory);
+    } else {
+      injectedFactory = buildFactoryWithInjections(this, name, factory, instanceInjections);
     }
 
-    this.brandInstance(injectedFactory, name);
+    copyOwnWritableProps(factory, injectedFactory);
+
+    let factoryInjections = this.findInjectionsFor(type, name, true);
+    if (factoryInjections) {
+      applyInjections(injectedFactory, factoryInjections, this);
+    }
+
+    this.brand(injectedFactory, name);
     injectedFactory.constructor = factory;
 
     return injectedFactory;
   }
+}
+
+function copyOwnWritableProps(source: any, target: any) {
+  // Copy any static methods and properties from the original factory.
+  for (let key of Object.getOwnPropertyNames(source)) {
+    let desc = Object.getOwnPropertyDescriptor(source, key);
+    if (!desc || desc.writable) {
+      target[key] = source[key];
+    }
+  }
+}
+
+function buildFactory(container: Container, name: Key, factory: Factory) {
+  return function() {
+    let instance = new factory(...arguments);
+    container.brand(instance, name);
+
+    return instance;
+  };
+}
+
+function applyInjections(target: any, injections: InjectionOptions[], container: Container) {
+  injections.forEach((injection) => {
+    let [injectionType, injectionName] = injection.with;
+    target[injection.as] = container.findInstance(injectionType, injectionName);
+  });
+}
+
+function buildFactoryWithInjections(container: Container, name: Key, factory: Factory, injections: InjectionOptions[]) {
+  return function() {
+    let instance = new factory(...arguments);
+    container.brand(instance, name);
+    applyInjections(instance, injections, container);
+
+    return instance;
+  };
 }
 
 namespace Container {
@@ -244,6 +292,10 @@ namespace Container {
   export interface Result {
     [meta: string]: Meta;
   }
+}
+
+function stripFileExtension(path: string) {
+  return path.split(".").slice(0, -1).join(".");
 }
 
 function cacheFor(cache: Cache, type: string): TypeCache {
