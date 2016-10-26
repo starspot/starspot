@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "test": "mocha",
+    "test:coverage": "nyc --extension .ts --register=ts-node/register npm test",
     "build": "tsc -p tsconfig.build.json",
     "prepublish": "npm test && npm run build",
     "postversion": "npm publish && git push && git push --tags"
@@ -33,6 +34,7 @@
     "@types/route-recognizer": "0.0.27",
     "chai": "^3.5.0",
     "mocha": "^3.0.2",
+    "nyc": "^8.3.2",
     "ts-node": "^1.3.0",
     "tslint": "^4.0.0-dev.0",
     "typescript": "^2.1.0-dev.20161005"
