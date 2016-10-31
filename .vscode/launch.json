@@ -17,7 +17,25 @@
       "env": {
         "NODE_ENV": "development"
       },
-      "externalConsole": false,
+      "sourceMaps": true,
+      "outDir": null
+    },
+    {
+      "name": "Debug starspot-core Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/packages/starspot-core/node_modules/.bin/_mocha",
+      "stopOnEntry": false,
+      "args": [],
+      "cwd": "${workspaceRoot}/packages/starspot-core",
+      "preLaunchTask": null,
+      "runtimeExecutable": null,
+      "runtimeArgs": [
+        "--nolazy"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      },
       "sourceMaps": true,
       "outDir": null
     },

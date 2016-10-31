@@ -88,7 +88,7 @@ export default class Resolver {
         this.ui.veryVerbose({
           name: "resolver-requiring-path",
           path: absolutePath
-        });
+       });
 
         mod = require(absolutePath);
       } catch (e) {
@@ -136,6 +136,11 @@ export default class Resolver {
     return paths;
   }
 
+  invalidateCache(path: string) {
+    path = stripFileExtension(path);
+    delete require.cache[require.resolve(path)];
+  }
+
   detectConflictingFiles([type, name]: Entity, paths: string[]) {
     function exists(path: string) {
       try {
@@ -158,4 +163,8 @@ export default class Resolver {
       });
     }
   }
+}
+
+function stripFileExtension(path: string) {
+  return path.split(".").slice(0, -1).join(".");
 }
