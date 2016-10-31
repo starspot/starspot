@@ -108,7 +108,7 @@ describe("Fetching Data", function () {
 
       @writableAttributes("title", "src")
       class PhotoResource extends Resource<any> {
-        async create(options: Resource.CreateOptions) {
+        static async create(options: Resource.CreateOptions) {
           let newAttrs = Object.assign({
             id: "1234"
           }, options.attributes);

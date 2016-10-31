@@ -21,13 +21,14 @@ describe("Fetching Data", function () {
     @updatable
     src: string;
 
-    async findByID(id: JSONAPI.ID) {
-      return new Photo({ id });
-    }
-
     async updateAttributes(attributes: Resource.Attributes) {
       Object.assign(this.model, attributes);
     }
+
+    static async findByID(id: JSONAPI.ID) {
+      return new Photo({ id });
+    }
+
   }
 
   class Photo extends Model { };

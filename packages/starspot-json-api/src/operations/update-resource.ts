@@ -14,7 +14,7 @@ export default class UpdateResourceOperation extends Operation {
     if (!this.id) { throw new Error("You must provide an id when updating"); }
 
     let Resource = this.findResource();
-    let model = await (new Resource()).findByID(this.id);
+    let model = await Resource.findByID(this.id);
     let resource = new Resource(model);
     let attributes = processAttributes(this.type, this.attributes, resource["@@fields"]);
 
