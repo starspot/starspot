@@ -14,8 +14,7 @@ export default class CreateResourceOperation extends Operation {
     }
 
     let Resource = this.findResource();
-    // TODO make this method static on the resource
-    let model = await (new Resource()).create({
+    let model = await Resource.create({
       attributes: camelizeKeys(this.attributes)
     });
 
