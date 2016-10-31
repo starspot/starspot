@@ -1,0 +1,8 @@
+{
+  "extension": [
+    ".ts"
+  ],
+  "register": [
+    "ts-node/register"
+  ]
+}

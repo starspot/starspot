@@ -2,6 +2,7 @@
 {
   "typescript.tsdk": "./packages/starspot-core/node_modules/typescript/lib/",
   "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
   "files.exclude": {
     "**/node_modules": true,
     "**/bower_components": true,

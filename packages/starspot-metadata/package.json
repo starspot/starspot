@@ -1,7 +1,7 @@
 {
-  "name": "<package-name>",
-  "version": "0.4.3",
-  "description": "<package-description>",
+  "name": "starspot-metadata",
+  "version": "0.6.0",
+  "description": "Utilities for managing class and instance metadata, such as that set by decorators.",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",
@@ -25,8 +25,7 @@
     "url": "https://github.com/starspot/starspot/issues"
   },
   "homepage": "https://github.com/starspot/starspot#readme",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^3.4.34",
     "@types/mocha": "^2.2.29",

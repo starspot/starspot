@@ -21,6 +21,7 @@ rewriteJSON("package.json", pkg => {
 });
 
 mkdir("src");
+touch("src/index.ts");
 link("tsconfig.json");
 link("tsconfig.build.json");
 link("tslint.json");

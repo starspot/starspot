@@ -3,7 +3,7 @@ import { ResourceResult } from "../results";
 import JSONAPI from "../json-api";
 import { camelize, underscore } from "inflected";
 import { AttributeNotUpdatableError } from "../exceptions";
-import { Descriptors } from "../resource";
+import { Fields, fieldsFor } from "../resource/fields";
 
 export default class UpdateResourceOperation extends Operation {
   attributes: JSONAPI.AttributesObject;
@@ -16,7 +16,7 @@ export default class UpdateResourceOperation extends Operation {
     let Resource = this.findResource();
     let model = await Resource.findByID(this.id);
     let resource = new Resource(model);
-    let attributes = processAttributes(this.type, this.attributes, resource["@@fields"]);
+    let attributes = processAttributes(this.type, this.attributes, fieldsFor(resource));
 
     await resource.updateAttributes(attributes);
     await this.target.invokeCallback("update", model);
@@ -27,13 +27,13 @@ export default class UpdateResourceOperation extends Operation {
   }
 }
 
-function processAttributes(type: string, attributes: JSONAPI.AttributesObject, descriptors: Descriptors): JSONAPI.AttributesObject {
+function processAttributes(type: string, attributes: JSONAPI.AttributesObject, fields: Fields): JSONAPI.AttributesObject {
   let processed = {};
 
   for (let key of Object.keys(attributes)) {
     let camelizedKey = camelize(underscore(key), false);
 
-    if ((camelizedKey in descriptors) && descriptors[camelizedKey].updatable) {
+    if (fields.has(camelizedKey) && fields.get(camelizedKey).updatable) {
       processed[camelizedKey] = attributes[key];
     } else {
       throw new AttributeNotUpdatableError(type, key);

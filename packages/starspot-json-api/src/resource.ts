@@ -1,6 +1,8 @@
-import { Model, Reflector } from "starspot-core";
-import JSONAPI from "./json-api";
 import Inflected = require("inflected");
+import { Model, Reflector } from "starspot-core";
+
+import JSONAPI from "./json-api";
+import { setFieldsFor, mergeFields } from "./resource/fields";
 
 /**
  * A Resource tells Starspot how to map models from your ORM into a JSON
@@ -25,27 +27,14 @@ import Inflected = require("inflected");
 class Resource<T extends Model> {
   model: T;
 
-  static "@@fields": Descriptors;
-  "@@fields": Descriptors;
   _attributesList: string[];
   _relationshipsList: string[];
 
   // TypeScript can't infer constructor property for some reason.
   ["constructor"]: typeof Resource;
   constructor(model?: T) {
-    let fields = this["@@fields"] = merge({}, this["@@fields"], this.constructor["@@fields"]);
-    let relationships: string[] = [];
-    let attributes: string[] = [];
-
-    let fieldKeys = Object.keys(fields);
-    for (let i = 0; i < fieldKeys.length; i++) {
-      let key = fieldKeys[i];
-      if (fields[key] instanceof AttributeDescriptor) {
-        attributes.push(key);
-      } else {
-        relationships.push(key);
-      }
-    }
+    let [fields, attributes, relationships] = mergeFields(this.constructor.prototype, this.constructor);
+    setFieldsFor(this, fields);
 
     this._attributesList = attributes;
     this._relationshipsList = relationships;
@@ -69,17 +58,6 @@ class Resource<T extends Model> {
   static async create?(options: Resource.CreateOptions): Promise<Model>;
   static async findByID?(id: JSONAPI.ID): Promise<Model>;
   static async findAll?(): Promise<Model[]>;
-}
-
-function merge(target: any, ...sources: any[]) {
-  for (let i = 0; i < sources.length; i++) {
-    let source = sources[i];
-    for (let key in source) {
-      target[key] = source[key];
-    }
-  }
-
-  return target;
 }
 
 class ResourceReflector implements Reflector {
@@ -128,130 +106,4 @@ namespace Resource {
   }
 }
 
-export class Descriptor {
-  constructor(public name: string) {
-  }
-
-  updatable = false;
-  creatable = false;
-
-  get writable() {
-    return this.updatable && this.creatable;
-  }
-
-  set writable(writable: boolean) {
-    this.updatable = writable;
-    this.creatable = writable;
-  }
-
-  clone(): Descriptor {
-    let desc = new (<any>this.constructor)(this.name);
-    desc.updatable = this.updatable;
-    desc.creatable = this.creatable;
-    return desc;
-  }
-}
-
-export class AttributeDescriptor extends Descriptor {
-}
-
-export type RelationshipType = "hasOne" | "hasMany";
-
-export class RelationshipDescriptor extends Descriptor {
-  type: RelationshipType;
-}
-
-export interface Descriptors {
-  [attr: string]: Descriptor
-}
-
-interface HasFields {
-  "@@fields": Descriptors
-}
-
-/*
- * Property Decorators
- */
-export function attribute(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute, AttributeDescriptor);
-}
-
-export function writable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute, AttributeDescriptor).writable = true;
-}
-
-export function updatable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute, AttributeDescriptor).updatable = true;
-}
-
-export function creatable(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute, AttributeDescriptor).creatable = true;
-}
-
-export function readOnly(resource: Resource<any>, attribute: string) {
-  descriptorFor(resource, attribute, AttributeDescriptor).writable = false;
-}
-
-/*
- * Class Decorators
- */
-export function attributes(...attributes: string[]) {
-  return createAttributes(attributes);
-}
-
-export function writableAttributes(...attributes: string[]) {
-  return createAttributes(attributes, "writable");
-}
-
-export function updatableAttributes(...attributes: string[]) {
-  return createAttributes(attributes, "updatable");
-}
-
-export function creatableAttributes(...attributes: string[]) {
-  return createAttributes(attributes, "creatable");
-}
-
-function createAttributes(attributes: string[], flag?: string) {
-  return function(resourceConstructor: typeof Resource) {
-    for (let i = 0; i < attributes.length; i++) {
-      let desc = descriptorFor(resourceConstructor, attributes[i], AttributeDescriptor);
-      if (flag) { desc[flag] = true; }
-    }
-  };
-}
-
-export function hasOne(relationship: string) {
-  return function(resourceConstructor: typeof Resource) {
-    let desc = descriptorFor(resourceConstructor, relationship, RelationshipDescriptor);
-    desc.type = "hasOne";
-  };
-}
-
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
-/**
- * Retrieves the attribute descriptor for the named attribute, creating a new
- * descriptor if none already exists.
- */
-function descriptorFor<T extends Descriptor>(proto: HasFields, name: string, DescriptorClass: { new(...args: any[]): T }): T {
-  let fields = fieldsFor(proto);
-  let desc = fields[name];
-
-  if (!desc) {
-    desc = fields[name] = new DescriptorClass(name);
-  } else if (!hasOwnProperty.call(fields, name)) {
-    desc = fields[name] = desc.clone();
-  }
-
-  return desc as T;
-}
-
-function fieldsFor(proto: HasFields) {
-  let fields = proto["@@fields"];
-
-  if (!fields || !proto.hasOwnProperty("@@fields")) {
-    fields = proto["@@fields"] = Object.create(fields || null);
-  }
-
-  return fields;
-}
+export * from "./resource/decorators";
