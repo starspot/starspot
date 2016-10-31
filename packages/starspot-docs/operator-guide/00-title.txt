@@ -1,0 +1,6 @@
+---
+title: "Starspot Operator Guide"
+author: Tom Dale
+rights:  Creative Commons Non-Commercial Share Alike 3.0
+language: en-US
+---
