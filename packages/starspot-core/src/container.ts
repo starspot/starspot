@@ -230,7 +230,7 @@ class Container {
       injectedFactory = buildFactoryWithInjections(this, name, factory, instanceInjections);
     }
 
-    copyOwnWritableProps(factory, injectedFactory);
+    Object.setPrototypeOf(injectedFactory, factory);
 
     let factoryInjections = this.findInjectionsFor(type, name, true);
     if (factoryInjections) {
@@ -241,16 +241,6 @@ class Container {
     injectedFactory.constructor = factory;
 
     return injectedFactory;
-  }
-}
-
-function copyOwnWritableProps(source: any, target: any) {
-  // Copy any static methods and properties from the original factory.
-  for (let key of Object.getOwnPropertyNames(source)) {
-    let desc = Object.getOwnPropertyDescriptor(source, key);
-    if (!desc || desc.writable) {
-      target[key] = source[key];
-    }
   }
 }
 

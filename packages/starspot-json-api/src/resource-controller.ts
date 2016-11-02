@@ -6,15 +6,15 @@ import JSONAPI from "./json-api";
 import { JSONAPIError } from "./exceptions";
 
 export default class ResourceController extends Controller {
-  async index(params: Controller.Parameters) {
+  async index(params: Controller.Parameters): Promise<JSONAPI.Document> {
     return this.processRequest(params);
   }
 
-  async create(params: Controller.Parameters) {
+  async create(params: Controller.Parameters): Promise<JSONAPI.Document> {
     return this.processRequest(params);
   }
 
-  async update(params: Controller.Parameters) {
+  async update(params: Controller.Parameters): Promise<JSONAPI.Document> {
     return this.processRequest(params);
   }
 
