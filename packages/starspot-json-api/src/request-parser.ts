@@ -114,9 +114,9 @@ export default class RequestParser {
     this.operations.push(new Op(options));
   }
 
-  get resource(): Resource<any> {
+  get resource(): typeof Resource {
     let resourceName = inflected.singularize(this.params.controllerName);
-    return this.container.findInstance("resource", resourceName);
+    return this.container.findFactory("resource", resourceName);
   }
 }
 
