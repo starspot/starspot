@@ -12,17 +12,17 @@ class Application {
   initializers: Application.Initializer[];
   env: Environment;
 
-  _rootPath: string;
+  rootPath: string;
 
   constructor(options: Application.ConstructorOptions = {}) {
     this.ui = options.ui || new UI();
     this.env = options.env || new Environment();
     this.initializers = options.initializers || [];
 
-    this._rootPath = options.rootPath;
+    this.rootPath = options.rootPath;
 
     this.container = options.container || new Container({
-      rootPath: this._rootPath
+      rootPath: this.rootPath
     });
   }
 
