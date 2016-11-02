@@ -5,6 +5,7 @@ import Resource, {
   writable,
   readOnly
 } from "../src/resource";
+import { fieldsFor } from "../src/resource/fields";
 
 describe("Resource", function() {
 
@@ -55,8 +56,8 @@ describe("Resource", function() {
       let b = new B();
       let c = new C();
 
-      expect(b["@@fields"]["a1"].writable).to.be.true;
-      expect(c["@@fields"]["a1"].writable).to.be.false;
+      expect(fieldsFor(b).get("a1").writable).to.be.true;
+      expect(fieldsFor(c).get("a1").writable).to.be.false;
     });
 
   });

@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "test": "mocha",
-    "test:coverage": "nyc --extension .ts --register=ts-node/register npm test",
+    "test:coverage": "nyc --extension=.ts --register=ts-node/register --reporter=lcov npm test",
     "build": "tsc -p tsconfig.build.json",
     "prepublish": "npm test && npm run build",
     "postversion": "npm publish && git push && git push --tags"

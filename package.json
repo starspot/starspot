@@ -6,9 +6,13 @@
   "license": "MIT",
   "scripts": {
     "test": "lerna run test",
+    "test:coverage": "nyc npm test",
+    "test:coverage:report": "nyc report --reporter=text-lcov | coveralls",
     "postinstall": "lerna bootstrap"
   },
   "devDependencies": {
-    "lerna": "2.0.0-beta.28"
+    "coveralls": "^2.11.14",
+    "lerna": "2.0.0-beta.28",
+    "nyc": "^8.3.2"
   }
 }
