@@ -33,6 +33,7 @@ namespace Controller {
     response: Application.Response;
     action: string;
     controllerName: string;
+    context: Controller.Context = {};
 
     constructor(options: ParameterConstructorOptions) {
       this.request = options.request;
@@ -58,5 +59,12 @@ namespace Controller {
         return JSON.parse(data);
       });
     }
+  }
+
+  /**
+   * Dictionary allowing middleware/decorators to provide information to controllers alongside the JSON API payload
+   */
+  export interface Context {
+    [key: string]: any;
   }
 }
