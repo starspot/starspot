@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css?family=Vollkorn');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Vollkorn;
+  font-size: 16px;
+}
+
+@media (min-width: 800px) {
+  body {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1200px) {
+  body {
+    font-size: 20px;
+  }
+}
+
+#TOC {
+  position: fixed;
+  left: 0;
+}
+
+h1 {
+  font-size: 6.854em;
+  background: black;
+  color: white;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
