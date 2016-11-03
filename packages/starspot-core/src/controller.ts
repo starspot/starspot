@@ -35,6 +35,8 @@ namespace Controller {
     controllerName: string;
     context: Controller.Context = {};
 
+    _json: Promise<any>;
+
     constructor(options: ParameterConstructorOptions) {
       this.request = options.request;
       this.response = options.response;
@@ -43,6 +45,10 @@ namespace Controller {
     }
 
     json(): Promise<any> {
+      if (this._json) {
+        return this._json;
+      }
+
       let request = this.request;
       let body: Promise<string | Buffer>;
 
@@ -54,10 +60,12 @@ namespace Controller {
         return Promise.resolve(null);
       }
 
-      return body.then(data => {
+      this._json = body.then(data => {
         data = data.toString();
         return JSON.parse(data);
       });
+
+      return this._json;
     }
   }
 
