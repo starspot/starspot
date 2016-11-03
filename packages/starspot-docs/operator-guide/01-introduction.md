@@ -1,6 +1,33 @@
-# Starspot: Operator Guide
+## Introduction
 
-Welcome to Starspot. Starspot is a Node.js framework for building web services.
+Welcome to Starspot. Starspot is a Node.js framework for building modern web
+services.
+
+This book will guide you through everything you need to know to build a web API
+using Starspot. It is designed for new learners who want pragmatic advice for
+quickly writing programs. You should have some knowledge of JavaScript and
+Node.js already.
+
+### Why Starspot?
+
+Starspot is designed for developers who want to be quickly productive working in
+Node.js. While JavaScript has grown into quite a capable language, the Node
+ecosystem still tends too much towards chaos. That flexibility is great when you
+need it, but getting started requires spending days deciding on which libraries
+to patch together. And don't even mention the maintenance nightmare inheriting
+someone else's code.
+
+Starspot is opinionated without relying on magic. Its modularity means you can
+pull out any piece that you find yourself fighting with, and replace it with
+something that works better for your needs.
+
+Starspot also believes 100% that client-side web and native applications are the
+future. It has no built-in support for templates or rendering HTML. Modern
+servers should be APIs, and only APIs. Starspot is dramatically simpler than
+legacy frameworks because it doesn't have to support hybrid API/HTML
+monstrosities.
+
+### Philosophy
 
 Out of the box, Starspot includes everything needed to be productive
 building modern web APIs, including:
@@ -20,9 +47,7 @@ However, Starspot is completely modular. You can remove or replace any of the
 built-in functionality and replace it with something better suited to your
 needs.
 
-## Philosophy
-
-### SSL First
+#### SSL First
 
 Today, there's no excuse for deploying new services without encryption.
 Unfortunately, most development tools make you jump through hoops to set up a
@@ -31,14 +56,14 @@ local environment that works with SSL.
 Starspot makes SSL a first-class part of the development experience, automating
 the generation of certificates and the configuration of custom domains.
 
-### HTTP2 First
+#### HTTP2 First
 
 HTTP2 can dramatically improve the performance of web services, allowing servers
 to deliver many items at once without the traditional limit on the number of
 concurrent requests. Starspot's routing layer supports HTTP2 out of the box,
 with fallback to HTTP 1.1 for older clients.
 
-### Database Agnostic
+#### Database Agnostic
 
 Starspot ships with built-in support for SQL databases like MySQL and
 PostgreSQL. However, if you use something other than (or in addition to!) a SQL
@@ -47,7 +72,15 @@ libraries into the greater Starspot architecture.
 
 ## Installation
 
-To use Starspot, you will need Node v6 or later.
+To use Starspot, you will need Node 6 or later. You can check which version of Node
+you have by running:
+
+```sh
+node --version
+```
+
+If you have a version of Node lower than 6.0.0, you can install a newer version from
+the [nodejs.org Download page](https://nodejs.org/en/download/).
 
 Install Starspot globally using npm:
 

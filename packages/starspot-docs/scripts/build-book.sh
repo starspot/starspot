@@ -3,6 +3,8 @@
 rm -rf dist
 mkdir dist
 
+ASSETS="../../assets"
+
 find_source_files() {
   echo "\033[34mBuilding ${1}\033[0m"
   SOURCE_FILES=`find ./$1 -iname "*.md"`
@@ -24,7 +26,16 @@ build_pdf() {
 build_html() {
   local html="${DIST}/${BOOK_NAME}.html"
   echo_file "html" "${html}"
-  pandoc --standalone --toc --css="../../assets/book.css" --output="${html}" $SOURCE_FILES
+
+  pandoc --to=html5 \
+    --template="assets/template.html5" \
+    --standalone \
+    --toc \
+    --toc-depth=3 \
+    --css="${ASSETS}/book.css" \
+    --output="${html}" \
+    --verbose \
+    "${BOOK_NAME}/00-title.txt" $SOURCE_FILES
 }
 
 build_epub() {
