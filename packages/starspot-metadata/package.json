@@ -1,6 +1,6 @@
 {
   "name": "starspot-metadata",
-  "version": "0.6.0",
+  "version": "0.6.5",
   "description": "Utilities for managing class and instance metadata, such as that set by decorators.",
   "main": "dist/index.js",
   "scripts": {
