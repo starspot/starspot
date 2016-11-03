@@ -92,7 +92,15 @@ export default class Resolver {
 
         mod = require(absolutePath);
       } catch (e) {
-        if (e.code === "MODULE_NOT_FOUND") { continue; }
+        if (e.code === "MODULE_NOT_FOUND") {
+          // MODULE_NOT_FOUND can be thrown if the file we required exists but required a non-existent module itself
+          // In that case, we want to throw an error so the user knows to fix their module
+          try {
+            require.resolve(absolutePath);
+          } catch (e) {
+            continue;
+          }
+        }
 
         this.ui.veryVerbose({
           name: "resolver-requiring-error",

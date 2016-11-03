@@ -74,4 +74,13 @@ describe("Resolver", function() {
     }
   });
 
+  it("throws if a module is found with an invalid import", function() {
+    let resolver = new Resolver({
+      rootPath: fixture("resolver")
+    });
+
+    expect(function() {
+      resolver.resolve(["controller", "bad-require"]);
+    }).to.throw();
+  });
 });
