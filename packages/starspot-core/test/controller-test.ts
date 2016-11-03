@@ -32,7 +32,7 @@ describe("ControllerParameters", function() {
     });
   });
 
-  it("parses JSON from the request if it is a readable stream", async function() {
+  describe("with a readable stream request", function () {
     let request: any = new Readable({
       read() {
         this.push(JSON.stringify({ "hello": "world" }));
@@ -45,10 +45,24 @@ describe("ControllerParameters", function() {
     let controllerName = "controllerName";
 
     let params = new Controller.Parameters({ request, response, action, controllerName });
-    let json = await params.json();
 
-    expect(json).to.deep.equal({
-      hello: "world"
+
+    it("parses JSON", async function() {
+      let json = await params.json();
+
+      expect(json).to.deep.equal({
+        hello: "world"
+      });
+    });
+
+    it("can parse multiple times", async function () {
+      await params.json();
+
+      let json = await params.json();
+
+      expect(json).to.deep.equal({
+        hello: "world"
+      });
     });
   });
 });
