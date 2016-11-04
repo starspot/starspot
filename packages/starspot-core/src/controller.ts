@@ -67,6 +67,11 @@ namespace Controller {
 
       this._json = body.then(data => {
         data = data.toString();
+
+        if (!data) {
+          return;
+        }
+
         return JSON.parse(data);
       });
 
