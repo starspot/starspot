@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { createApplication, createResponse, createJSONRequest } from "starspot-test-core";
 import ResourceController, { after } from "../src/resource-controller";
 import Resource, { attributes, hasOne, writableAttributes } from "../src/resource";
+import { Application } from "starspot-core";
 import Model from "./helpers/model";
 
 // http://jsonapi.org/format/1.1/#fetching
@@ -10,26 +11,35 @@ describe("Fetching Data", function () {
   // http://jsonapi.org/format/1.1/#fetching-resources
   describe("Fetching Resources", function () {
 
-    it("generates index documents", async function () {
+    let app: Application;
+
+    beforeEach(async function () {
+
+      let models = [new Model({
+        _type: "articles",
+        _id: "1",
+        title: "JSON API paints my bikeshed!",
+        authorRelationship: {
+          _id: "9",
+          _type: "authors",
+          firstName: "Hassan"
+        }
+      }), new Model({
+        _type: "articles",
+        _id: "2",
+        title: "Rails is Omakase",
+        authorRelationship: null
+      })];
+
       @attributes("title")
       @hasOne("author")
       class ArticleResource extends Resource<any> {
         static async findAll() {
-          return [new Model({
-            _type: "articles",
-            _id: 1,
-            title: "JSON API paints my bikeshed!",
-            authorRelationship: {
-              _id: 9,
-              _type: "authors",
-              firstName: "Hassan"
-            }
-          }), new Model({
-            _type: "articles",
-            _id: 2,
-            title: "Rails is Omakase",
-            authorRelationship: null
-          })];
+          return models;
+        }
+
+        static async findByID(id: string) {
+          return models.find((model) => model._id === id);
         }
       }
 
@@ -37,7 +47,7 @@ describe("Fetching Data", function () {
       class AuthorResource extends Resource<any> {
       }
 
-      let app = await createApplication()
+      app = await createApplication()
         .routes(({ resources }) => {
           resources("articles");
         })
@@ -47,6 +57,9 @@ describe("Fetching Data", function () {
         .register("resource", "article", ArticleResource)
         .register("resource", "author", AuthorResource)
         .boot();
+    });
+
+    it("generates index documents", async function () {
 
       let request = createJSONAPIRequest("GET", "/articles");
       let response = createResponse();
@@ -99,6 +112,39 @@ describe("Fetching Data", function () {
       });
     });
 
+    it("generates individual resource documents", async function () {
+      let request = createJSONAPIRequest("GET", "/articles/1");
+      let response = createResponse();
+
+      await app.dispatch(request, response);
+
+      expect(response.statusCode).to.equal(200);
+
+      expect(response.toJSON()).to.deep.equal({
+        "data": {
+          "type": "articles",
+          "id": "1",
+          "attributes": {
+            "title": "JSON API paints my bikeshed!"
+          },
+          "relationships": {
+            "author": {
+              "data": {
+                "type": "authors",
+                "id": "9"
+              }
+            }
+          },
+        },
+        "included": [{
+          type: "authors",
+          "id": "9",
+          "attributes": {
+            "first-name": "Hassan"
+          }
+        }]
+      });
+    });
   });
 
   // http://jsonapi.org/format/upcoming/#crud-creating

@@ -18,6 +18,10 @@ export default class ResourceController extends Controller {
     return this.processRequest(params);
   }
 
+  async show(params: Controller.Parameters): Promise<JSONAPI.Document> {
+    return this.processRequest(params);
+  }
+
   async invokeCallback(event: string, ...args: any[]) {
     let callbacks = callbacksFor(this, event);
     for (let i = 0; i < callbacks.length; i++) {

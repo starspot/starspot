@@ -8,7 +8,7 @@ export default class Model extends CoreModel {
   constructor(options: any) {
     super();
 
-    this._id = options.id;
+    this._id = String(options.id);
     delete options.id;
 
     Object.assign(this, options);
