@@ -13,8 +13,13 @@ interface Controller {
 
 class Controller {
   createModel<T>(modelName: string): T {
+    let Model = this.findModel(modelName) as any;
+    return new Model();
+  }
+
+  findModel<T>(modelName: string): T {
     let container = Container.metaFor(this).container;
-    return new (container.findFactory("model", modelName))();
+    return container.findFactory("model", modelName);
   }
 }
 
