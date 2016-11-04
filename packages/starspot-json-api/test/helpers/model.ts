@@ -45,7 +45,7 @@ class ModelReflector implements Reflector {
 
   getRelationships(model: any) {
     return this.getAttributes(model)
-      .filter(k => k.substr(-12) != "Relationship")
+      .filter(k => k.substr(-12) !== "Relationship")
       .map(k => k.substr(0, k.length - 12));
   }
 

@@ -7,7 +7,7 @@ export default class GetResourcesOperation extends Operation {
   async process() {
     let Resource = this.findResource();
 
-    let models = await Resource.findAll()
+    let models = await Resource.findAll();
     let resources = models.map(model => new Resource(model));
 
     return new ResourcesResult(resources);

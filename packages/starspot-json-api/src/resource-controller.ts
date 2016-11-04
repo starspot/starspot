@@ -22,7 +22,7 @@ export default class ResourceController extends Controller {
     let callbacks = callbacksFor(this, event);
     for (let i = 0; i < callbacks.length; i++) {
       let method = this[callbacks[i]] as Function;
-      await method.apply(this, args); 
+      await method.apply(this, args);
     }
   }
 
@@ -67,7 +67,7 @@ export default class ResourceController extends Controller {
 export function after(event: string) {
   return function(proto: ResourceController, method: string) {
     callbacksFor(proto, event).push(method);
-  }
+  };
 }
 
 function callbacksFor(proto: any, event: string) {
