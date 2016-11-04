@@ -4,6 +4,8 @@ import GetResourcesOperation from "../src/operations/get-resources";
 import GetResourceOperation from "../src/operations/get-resource";
 import { Container } from "starspot-core";
 import { createRequest } from "starspot-test-core";
+import UnhandledActionError from "../src/errors/unhandled-action-error";
+import { ResourceTypeMismatch } from "../src/exceptions";
 
 describe("Request Parser", function() {
   let container: Container;
@@ -12,6 +14,19 @@ describe("Request Parser", function() {
     container = new Container();
 
     container.registerFactory("resource", "photo", PhotoResource);
+  });
+
+  it("errors on invalid requests", async function () {
+    let params = new Parameters("photos#wat");
+
+    let parser = new RequestParser(params, container, new Target());
+
+    try {
+      await parser.parse();
+      expect(false).to.be.true("async function did not throw");
+    } catch (e) {
+      expect(e).to.be.an.instanceof(UnhandledActionError);
+    }
   });
 
   it("parses index requests", async function() {
@@ -38,6 +53,48 @@ describe("Request Parser", function() {
 
     let operation = operations[0];
     expect(operation).to.be.an.instanceof(GetResourceOperation);
+  });
+
+  describe("parsing create requests", function () {
+    it("errors on type mismatch", async function () {
+      let params = new Parameters("photos#create", {
+        data: {
+          id: "123",
+          type: "secret",
+          attributes: {}
+        }
+      });
+
+      let parser = new RequestParser(params, container, new Target());
+
+      try {
+        await parser.parse();
+        expect(false).to.be.true("async function did not throw");
+      } catch (e) {
+        expect(e).to.be.an.instanceof(ResourceTypeMismatch);
+      }
+    });
+  });
+
+  describe("parsing update requests", function () {
+    it("errors on type mismatch", async function () {
+      let params = new Parameters("photos#update", {
+        data: {
+          id: "123",
+          type: "secret",
+          attributes: {}
+        }
+      });
+
+      let parser = new RequestParser(params, container, new Target());
+
+      try {
+        await parser.parse();
+        expect(false).to.be.true("async function did not throw");
+      } catch (e) {
+        expect(e).to.be.an.instanceof(ResourceTypeMismatch);
+      }
+    });
   });
 });
 
