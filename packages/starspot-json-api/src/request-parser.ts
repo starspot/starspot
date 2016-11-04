@@ -6,11 +6,13 @@ import JSONAPI from "./json-api";
 
 import Operation, { OperationOptions, CallbackTarget } from "./operation";
 import GetResourcesOperation from "./operations/get-resources";
+import GetResourceOperation from "./operations/get-resource";
 import CreateResourceOperation from "./operations/create-resource";
 import UpdateResourceOperation from "./operations/update-resource";
 
 import UnhandledActionError from "./errors/unhandled-action-error";
 import { ResourceTypeMismatch } from "./exceptions";
+import getLastSegmentFromUrl from "./util/get-last-segment-from-url";
 
 export interface ConcreteOperation {
   new (options: {}): Operation;
@@ -55,6 +57,9 @@ export default class RequestParser {
       case "index":
         this.processIndex();
         break;
+      case "show":
+        this.processShow();
+        break;
       case "create":
         this.processCreate();
         break;
@@ -70,6 +75,15 @@ export default class RequestParser {
 
   processIndex() {
     this.op(GetResourcesOperation, {
+      type: this.params.controllerName
+    });
+  }
+
+  processShow() {
+    let id = getLastSegmentFromUrl(this.params.request.url);
+
+    this.op(GetResourceOperation, {
+      id,
       type: this.params.controllerName
     });
   }

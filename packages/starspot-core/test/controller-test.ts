@@ -67,6 +67,21 @@ describe("Controller", function () {
         });
       });
     });
+
+    it("doesn't error on parsing when there is no body", async function () {
+      let request: any = {
+        body: ""
+      };
+
+      let response: any = {};
+      let action = "action";
+      let controllerName = "controllerName";
+
+      let params = new Controller.Parameters({ request, response, action, controllerName });
+      let json = await params.json();
+
+      expect(json).to.be.undefined;
+    });
   });
 
   describe("model helper methods", function () {

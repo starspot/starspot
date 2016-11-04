@@ -23,7 +23,7 @@ export default class UpdateResourceOperation extends Operation {
 
     let isValid = await resource.validate();
 
-    return new ResourceResult(resource, isValid ? 200: 422);
+    return new ResourceResult(resource, isValid ? 200 : 422);
   }
 }
 
