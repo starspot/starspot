@@ -1,6 +1,6 @@
 {
   "name": "starspot-cli",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "CLI tools for starspot",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -59,7 +59,7 @@
     "native-dns": "^0.7.0",
     "resolve": "^1.1.7",
     "route-recognizer": "^0.2.1",
-    "starspot-core": "^0.6.7",
+    "starspot-core": "^0.6.8",
     "wordwrap": "^1.0.0"
   }
 }
