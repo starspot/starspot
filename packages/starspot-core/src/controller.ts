@@ -31,6 +31,8 @@ namespace Controller {
     response: Application.Response;
     action: string;
     controllerName: string;
+    urlParams?: { [key: string]: any };
+    queryParams?: { [key: string]: any };
   }
 
   export class Parameters {
@@ -38,7 +40,9 @@ namespace Controller {
     response: Application.Response;
     action: string;
     controllerName: string;
-    context: Controller.Context = {};
+    context: Controller.Context;
+    urlParams: {};
+    queryParams: {};
 
     _json: Promise<any>;
 
@@ -47,6 +51,9 @@ namespace Controller {
       this.response = options.response;
       this.action = options.action;
       this.controllerName = options.controllerName;
+      this.urlParams = options.urlParams;
+      this.queryParams = options.queryParams;
+      this.context = {};
     }
 
     json(): Promise<any> {

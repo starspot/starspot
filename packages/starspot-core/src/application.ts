@@ -94,7 +94,9 @@ class Application {
             action: method,
             controllerName,
             request,
-            response
+            response,
+            urlParams: handlers[0].params,
+            queryParams: handlers.queryParams
           });
 
           result = Promise.resolve(controller[method](params));

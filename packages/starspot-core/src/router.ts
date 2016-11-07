@@ -12,8 +12,15 @@ interface Route {
   handler: Handler;
 }
 
+export interface RecognizeResults {
+  [index: number]: RecognizeResult;
+  length: number;
+  queryParams: {};
+}
+
 export interface RecognizeResult {
   handler: Handler;
+  params: { [key: string]: any };
 }
 
 interface Recognizers {
@@ -57,11 +64,11 @@ abstract class Router {
     recognizer.add([route]);
   }
 
-  handlersFor(verb: HTTPVerb, path: string): RecognizeResult[] {
+  handlersFor(verb: HTTPVerb, path: string): RecognizeResults {
     let recognizer = this.recognizerFor(verb);
 
     if (recognizer) {
-      return recognizer.recognize(path);
+      return recognizer.recognize(path) as any;
     }
 
     return null;
