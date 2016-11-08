@@ -12,7 +12,6 @@ import UpdateResourceOperation from "./operations/update-resource";
 
 import UnhandledActionError from "./errors/unhandled-action-error";
 import { ResourceTypeMismatch } from "./exceptions";
-import getLastSegmentFromUrl from "./util/get-last-segment-from-url";
 
 export interface ConcreteOperation {
   new (options: {}): Operation;
@@ -27,6 +26,9 @@ export interface RequestParameters {
 
   /** The name of the controller processing this request. */
   controllerName: string;
+
+  /** Params extracted from URL segments, such as `id` **/
+  urlParams: { [key: string]: any };
 
   /** Method that returns a promise that resolves to a JSON API document. */
   json(): Promise<JSONAPI.Document>;
@@ -80,7 +82,7 @@ export default class RequestParser {
   }
 
   processShow() {
-    let id = getLastSegmentFromUrl(this.params.request.url);
+    let id = this.params.urlParams["id"];
 
     this.op(GetResourceOperation, {
       id,

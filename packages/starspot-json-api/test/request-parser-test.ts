@@ -23,6 +23,7 @@ describe("Request Parser", function() {
 
     try {
       await parser.parse();
+      /* istanbul ignore next */
       expect(false).to.be.true("async function did not throw");
     } catch (e) {
       expect(e).to.be.an.instanceof(UnhandledActionError);
@@ -43,7 +44,7 @@ describe("Request Parser", function() {
   });
 
   it("parses show requests", async function () {
-    let params = new Parameters("photos#show");
+    let params = new Parameters("photos#show", {urlParams: {"id": "123"}});
 
     let parser = new RequestParser(params, container, new Target());
 
@@ -51,17 +52,20 @@ describe("Request Parser", function() {
 
     expect(operations.length).to.equal(1);
 
-    let operation = operations[0];
+    let operation = operations[0] as GetResourceOperation;
     expect(operation).to.be.an.instanceof(GetResourceOperation);
+    expect(operation.id).to.equal("123");
   });
 
   describe("parsing create requests", function () {
     it("errors on type mismatch", async function () {
       let params = new Parameters("photos#create", {
-        data: {
-          id: "123",
-          type: "secret",
-          attributes: {}
+        json: {
+          data: {
+            id: "123",
+            type: "secret",
+            attributes: {}
+          }
         }
       });
 
@@ -69,6 +73,7 @@ describe("Request Parser", function() {
 
       try {
         await parser.parse();
+        /* istanbul ignore next */
         expect(false).to.be.true("async function did not throw");
       } catch (e) {
         expect(e).to.be.an.instanceof(ResourceTypeMismatch);
@@ -79,10 +84,12 @@ describe("Request Parser", function() {
   describe("parsing update requests", function () {
     it("errors on type mismatch", async function () {
       let params = new Parameters("photos#update", {
-        data: {
-          id: "123",
-          type: "secret",
-          attributes: {}
+        json: {
+          data: {
+            id: "123",
+            type: "secret",
+            attributes: {}
+          }
         }
       });
 
@@ -90,6 +97,7 @@ describe("Request Parser", function() {
 
       try {
         await parser.parse();
+        /* istanbul ignore next */
         expect(false).to.be.true("async function did not throw");
       } catch (e) {
         expect(e).to.be.an.instanceof(ResourceTypeMismatch);
@@ -109,12 +117,14 @@ class Parameters {
   public action: string;
   public controllerName: string;
   public request = createRequest("/", "GET");
+  public urlParams: { [key: string]: any };
   private _json: any;
 
-  constructor(target: string, json?: any) {
+  constructor(target: string, {json, urlParams}: {json?: any, urlParams?: any} = {}) {
     let [controller, action] = target.split("#", 2);
     this.controllerName = controller;
     this.action = action;
+    this.urlParams = urlParams;
 
     this._json = json;
   }
