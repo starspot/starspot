@@ -35,7 +35,7 @@ function processAttributes(type: string, attributes: JSONAPI.AttributesObject, f
 
     if (fields.has(camelizedKey) && fields.get(camelizedKey).updatable) {
       processed[camelizedKey] = attributes[key];
-    } else {
+    } else if (fields.has(camelizedKey) && !fields.get(camelizedKey).ignoreUpdateErrors) {
       throw new AttributeNotUpdatableError(type, key);
     }
   }

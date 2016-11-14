@@ -20,8 +20,20 @@ export function creatable(resource: Resource<any>, attribute: string) {
   fieldFor(resource, attribute, AttributeField).creatable = true;
 }
 
-export function readOnly(resource: Resource<any>, attribute: string) {
-  fieldFor(resource, attribute, AttributeField).writable = false;
+export function readOnly(resource: Resource<any> | any, attribute?: string | any): any {
+  if (arguments.length === 1) {
+    let options: any = resource;
+
+    return function (resource: Resource<any>, attribute: string) {
+      let field = fieldFor(resource, attribute, AttributeField);
+      field.writable = false;
+      field.ignoreUpdateErrors = options && options.ignoreWrites;
+    }
+  } else {
+    let field = fieldFor(resource, attribute, AttributeField);
+    field.writable = false;
+    field.ignoreUpdateErrors = false;
+  }
 }
 
 /*
