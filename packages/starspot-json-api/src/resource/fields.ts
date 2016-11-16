@@ -66,6 +66,7 @@ export class Field implements Descriptor {
 
   updatable = false;
   creatable = false;
+  ignoreUpdateErrors = false;
 
   get writable() {
     return this.updatable && this.creatable;
@@ -80,6 +81,8 @@ export class Field implements Descriptor {
     let desc = new (<any>this.constructor)(this.name);
     desc.updatable = this.updatable;
     desc.creatable = this.creatable;
+    desc.ignoreUpdateErrors = this.ignoreUpdateErrors;
+
     return desc;
   }
 }
