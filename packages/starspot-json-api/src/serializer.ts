@@ -48,7 +48,7 @@ class Serializer {
       json.included = included;
     }
 
-    return { json, statusCode }
+    return { json, statusCode };
   }
 
   processResults(results: Result[]) {
@@ -71,11 +71,11 @@ class Serializer {
     this.primaryResources.push(...result.resources);
   }
 
-  async serialize(model: any, included: Included): Promise<JSONAPI.DataDocument> {
+  async serialize(model: any, included = new Included()): Promise<JSONAPI.DataDocument> {
     return { data: await serializeModel(model, included) };
   }
 
-  async serializeMany(models: any[], included: Included): Promise<JSONAPI.DataDocument> {
+  async serializeMany(models: any[], included = new Included()): Promise<JSONAPI.DataDocument> {
     let data: JSONAPI.PrimaryData = [];
 
     for (let i = 0; i < models.length; i++) {
@@ -181,7 +181,7 @@ function serializeRelationship(relationship: Reflector.Relationship) {
 
   return {
     data
-  }
+  };
 }
 
 function dasherizeAttribute(attribute: string): string {

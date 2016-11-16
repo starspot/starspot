@@ -68,3 +68,49 @@ export interface Reflectable {
 export interface Factory {
   prototype: {};
 }
+
+export type StaticReflectorOptions = {
+  type: string;
+  attributes: string[];
+  idAttribute?: string;
+};
+
+export class StaticReflector implements Reflector {
+  protected type: string;
+  protected attributes: string[];
+  protected idAttribute: string;
+
+  constructor(options: StaticReflectorOptions) {
+    this.type = options.type;
+    this.attributes = options.attributes;
+    this.idAttribute = options.idAttribute || "id";
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getID(model: any) {
+    return model[this.idAttribute] as string;
+  }
+
+  getAttributes() {
+    return this.attributes;
+  }
+
+  getAttribute(model: any, attribute: string) {
+    return model[attribute];
+  }
+
+  getRelationships(_model: any): string[] {
+    return [];
+  }
+
+  getRelationship(_model: any, _attribute: string): Reflector.Relationship {
+    return null;
+  }
+
+  async validate?(_model: any) {
+    return true;
+  }
+}
