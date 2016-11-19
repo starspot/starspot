@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css?family=Vollkorn|Space+Mono');
+
+/* Type Scale
+3.998em
+2.827em
+1.999em
+1.414em
+1em
+0.707em
+0.5em
+0.354em
+*/
+
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Vollkorn;
+  color: #333;
+}
+
+html {
+  font-size: 16px;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1em;
+  font-family: "Space Mono", monospace;
+  margin: 2rem 0 1.5rem;
+}
+
+h1 {
+  color: #5E548E;
+  font-size: 2.827em;
+}
+
+h2 {
+  color: #5E548E;
+  font-size: 1.999em;
+}
+
+h3 {
+  color: #9F86C0;
+  font-size: 1.414em;
+}
+
+h4 {
+  text-transform: uppercase;
+  font-size: 0.707em;
+  margin-bottom: 1rem;
+  color: #866cad;
+}
+
+p {
+  line-height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  box-shadow: inset 0 -5px 0 #E0B1CB;
+}
+
+a:hover {
+  border-bottom: 3px solid #5E548E;
+}
+
+main, nav {
+  margin-top: 1.414em;
+}
+
+nav {
+  margin: 2rem;
+}
+
+nav ul {
+  font-size: 1.0em;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+nav ul li {
+  margin: 0.5em 0;
+}
+
+nav > ul > li {
+  margin-top: 0;
+}
+
+nav a {
+  font-family: "Space Mono", monospace;
+  color: #231942;
+  text-decoration: none;
+  box-shadow: inset 0 -5px 0 #E0B1CB;
+}
+
+nav ul ul {
+  padding-left: 1rem;
+}
+
+nav ul ul a {
+  font-size: 0.7em;
+  box-shadow: none;
+}
+
+main {
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+@media (min-width: 50em) {
+  html {
+    font-size: 2vw;
+  }
+}
+
+@media (min-width: 768px) {
+  header > h1 {
+    margin-top: 0;
+    letter-spacing: -0.05em;
+    word-spacing: -0.3em;
+  }
+
+  nav {
+    left: 0;
+    width: 14rem;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 90em) {
+  main {
+    max-width: 32em;
+  }
+
+  html {
+    font-size: 1.8em;
+  }
+}
