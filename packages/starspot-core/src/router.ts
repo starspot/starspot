@@ -124,12 +124,32 @@ namespace Router {
       router.addRoute("OPTIONS", path, controller, "cors");
       // OPTIONS /photos/1234 -> PhotosController.cors()
       router.addRoute("OPTIONS", memberPath, controller, "cors");
-    }
+    };
 
     get = (path: string, { controller, method }: RouteOptions): void => {
       let router = this._router;
       router.addRoute("GET", path, controller, method);
-    }
+    };
+
+    post = (path: string, { controller, method }: RouteOptions): void => {
+      let router = this._router;
+      router.addRoute("POST", path, controller, method);
+    };
+
+    patch = (path: string, { controller, method }: RouteOptions): void => {
+      let router = this._router;
+      router.addRoute("PATCH", path, controller, method);
+    };
+
+    delete = (path: string, { controller, method }: RouteOptions): void => {
+      let router = this._router;
+      router.addRoute("DELETE", path, controller, method);
+    };
+
+    options = (path: string, { controller, method }: RouteOptions): void => {
+      let router = this._router;
+      router.addRoute("OPTIONS", path, controller, method);
+    };
   }
 }
 
