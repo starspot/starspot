@@ -20,15 +20,21 @@ export function creatable(resource: Resource<any>, attribute: string) {
   fieldFor(resource, attribute, AttributeField).creatable = true;
 }
 
-export function readOnly(resource: Resource<any> | any, attribute?: string | any): any {
+export interface ReadOnlyOptions {
+  ignoreWrites?: boolean;
+}
+
+export function readOnly(resource: Resource<any>, attribute: string): void;
+export function readOnly(options: ReadOnlyOptions): PropertyDecorator;
+export function readOnly(resource: Resource<any> | ReadOnlyOptions, attribute?: string): void | PropertyDecorator {
   if (arguments.length === 1) {
-    let options: any = resource;
+    let options: ReadOnlyOptions = resource;
 
     return function (resource: Resource<any>, attribute: string) {
       let field = fieldFor(resource, attribute, AttributeField);
       field.writable = false;
       field.ignoreUpdateErrors = options && options.ignoreWrites;
-    }
+    };
   } else {
     let field = fieldFor(resource, attribute, AttributeField);
     field.writable = false;
