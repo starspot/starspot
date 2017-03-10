@@ -1,6 +1,6 @@
 {
   "name": "starspot-docs",
-  "version": "0.6.0",
+  "version": "0.6.12",
   "scripts": {
     "build": "./scripts/build-book.sh",
     "deploy": "npm run build && ./scripts/deploy.sh"
